@@ -74,7 +74,7 @@ export const UI = (() => {
     dealerScoreEl.textContent = handScore(s.dealerHand);
     
     // For dealer, only hide the second card during player's turn
-    const hideSecondCard = s.currentHandIndex === 0 && s.playerHands.some(hand => hand.state === 'playing');
+    const hideSecondCard = s.playerHands.some(hand => hand.state === 'playing');
     renderHandCards(s.dealerHand, dealerCardsEl, hideSecondCard); // Pass `hideSecondCard` flag
 
     playerSectionEl.innerHTML = '';
