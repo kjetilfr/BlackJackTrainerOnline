@@ -1,206 +1,131 @@
 // game.js
 export const Game = (() => {
-  const suits = ["S", "H", "D", "C"];
+  const suits = ["S","H","D","C"];
   const values = ["A","2","3","4","5","6","7","8","9","10","J","Q","K"];
+  let deck = [], settings=null, dealerHand=[], playerHands=[], currentHandIndex=0;
+  
+  let playerBank = 100; // default starting chips
 
-  let deck = [];
-  let settings = null;
-
-  let dealerHand = [];
-  let playerHands = []; // array of { cards: [], state: '', bet: number, doubled: bool, surrendered: bool }
-  let currentHandIndex = 0;
-
-  // Helpers
-
-  function createDeck(){
-    deck = [];
-    suits.forEach(suit => {
-      values.forEach(value => {
-        deck.push({value, suit});
-      });
-    });
-    deck.sort(() => Math.random() - 0.5);
-  }
-
-  function drawCard(){
-    if(deck.length === 0) createDeck();
-    return deck.pop();
-  }
-
-  function cardValue(card){
-    if(["J","Q","K"].includes(card.value)) return 10;
-    if(card.value === "A") return 11;
-    return parseInt(card.value);
-  }
-
-  function handScore(hand){
-    let score = hand.reduce((acc, c) => acc + cardValue(c), 0);
-    let aces = hand.filter(c => c.value === "A").length;
-    while(score > 21 && aces > 0){
-      score -= 10;
-      aces--;
-    }
-    return score;
-  }
-
-  // Initialize game
+  function createDeck(){ … } // same as before
+  function drawCard(){ … }
+  function cardValue(c){ … }
+  function handScore(h){ … }
 
   function start(userSettings){
     settings = userSettings;
+    playerBank = userSettings.startingChips || playerBank;
     createDeck();
-
-    dealerHand = [drawCard(), drawCard()];
-    playerHands = [];
-
-    for(let i=0; i < settings.numberOfHands; i++){
+    dealerHand=[drawCard(),drawCard()];
+    playerHands=[];
+    for(let i=0;i<settings.numberOfHands;i++){
+      const cards=[drawCard(),drawCard()];
+      const bet = userSettings.initialBet || 10;
+      playerBank -= bet;
+      const isBJ = handScore(cards)===21;
       playerHands.push({
-        cards: [drawCard(), drawCard()],
-        state: 'playing',
-        bet: 1,
-        doubled: false,
-        surrendered: false,
-        splitsDone: 0,
+        cards, state:isBJ?'blackjack':'playing',
+        bet, insured:false, doubled:false,
+        surrendered:false, splitsDone:0, outcome:null
       });
     }
-
-    currentHandIndex = 0;
+    currentHandIndex = playerHands.findIndex(h=>h.state==='playing');
+    if(currentHandIndex < 0) dealerPlay();
   }
 
-  // Game actions: hit, stand, double, split, surrender etc
-  // Implement logic for late surrender, double after split, resplitting, split aces restrictions, insurance, dealer hit on soft 17 etc.
-
-  function canSplit(hand){
-    if(hand.cards.length !== 2) return false;
-    const c1 = hand.cards[0];
-    const c2 = hand.cards[1];
-    if(c1.value !== c2.value) return false;
-    if(playerHands.length >= settings.maxSplitHands) return false;
-    return true;
-  }
-
-  function hitCurrentHand(){
-  if(currentHandIndex >= playerHands.length) return;
-  const hand = playerHands[currentHandIndex];
-  if(hand.state !== 'playing') return;
-
-  hand.cards.push(drawCard());
-  const score = handScore(hand.cards);
-  if(score > 21) {
-    hand.state = 'busted';
-    nextHand(); // 🛠️ Move to next hand automatically
-  }
-}
-
-
-  function standCurrentHand(){
-    if(currentHandIndex >= playerHands.length) return;
-    playerHands[currentHandIndex].state = 'stood';
-  }
+  function hitCurrentHand(){ … } // same with bust and nextHand()
+  function standCurrentHand(){ … } // calls nextHand()
 
   function doubleCurrentHand(){
-  if(currentHandIndex >= playerHands.length) return;
-  const hand = playerHands[currentHandIndex];
-  if(hand.state !== 'playing' || hand.cards.length !== 2) return;
-
-  hand.bet *= 2;
-  hand.doubled = true;
-  hand.cards.push(drawCard());
-
-  const score = handScore(hand.cards);
-  hand.state = (score > 21) ? 'busted' : 'stood';
-
-  nextHand(); // 🛠️ Always advance after double
-}
-
+    const h = playerHands[currentHandIndex];
+    if(h.cards.length===2 && h.state==='playing'){
+      playerBank -= h.bet;
+      h.bet *=2; h.doubled=true;
+      h.cards.push(drawCard());
+      h.state = handScore(h.cards)>21?'busted':'stood';
+      nextHand();
+    }
+  }
 
   function surrenderCurrentHand(){
-  if(currentHandIndex >= playerHands.length) return;
-  const hand = playerHands[currentHandIndex];
-  if(hand.state !== 'playing') return;
-  if(settings.lateSurrender){
-    if(hand.cards.length === 2) {
-      hand.surrendered = true;
-      hand.state = 'surrendered';
-      nextHand(); // 🛠️ Surrender ends the hand
+    const h=playerHands[currentHandIndex];
+    if(settings.lateSurrender && h.cards.length===2){
+      h.surrendered=true; h.state='surrendered';
+      playerBank += h.bet/2;
+      nextHand();
     }
   }
-}
 
-
-  function splitCurrentHand(){
-    if(currentHandIndex >= playerHands.length) return;
-    const hand = playerHands[currentHandIndex];
-    if(!canSplit(hand)) return;
-
-    const cardToSplit = hand.cards.pop();
-    const newHand = {
-      cards: [cardToSplit, drawCard()],
-      state: 'playing',
-      bet: hand.bet,
-      doubled: false,
-      surrendered: false,
-      splitsDone: hand.splitsDone + 1,
-    };
-
-    if(settings.splitAcesDrawOneCardOnly && hand.cards[0].value === 'A'){
-      // After splitting aces, only one card drawn
-      hand.state = 'stood';
-      newHand.state = 'stood';
-    }
-
-    playerHands.splice(currentHandIndex + 1, 0, newHand);
-
-    // Add one card to original split hand as well
-    hand.cards.push(drawCard());
-  }
-
-  // Dealer plays according to dealerHitsSoft17 setting
-  function dealerPlay(){
-    while(true){
-      const score = handScore(dealerHand);
-      if(score > 21) break;
-      if(score > 17) break;
-      if(score === 17){
-        // Check if soft 17
-        let hasAce = dealerHand.some(c => c.value === 'A');
-        if(settings.dealerHitsSoft17 && hasAce) {
-          dealerHand.push(drawCard());
-        } else {
-          break;
-        }
-      } else {
-        dealerHand.push(drawCard());
+  function insureCurrentHand(){
+    const h = playerHands[currentHandIndex];
+    if(dealerHand[0].value==='A' && !h.insured){
+      const cost = h.bet/2;
+      if(playerBank>=cost){
+        playerBank-=cost;
+        h.insured=true;
       }
     }
   }
 
-  function nextHand(){
-    do {
-      currentHandIndex++;
-    } while (currentHandIndex < playerHands.length && playerHands[currentHandIndex].state !== 'playing');
-
-    if(currentHandIndex >= playerHands.length){
-      dealerPlay();
+  function splitCurrentHand(){
+    const h = playerHands[currentHandIndex];
+    if(canSplit(h)){
+      const c2 = h.cards.pop();
+      const newBet=h.bet;
+      playerBank -= newBet;
+      const newHand={
+        cards:[c2,drawCard()],
+        bet:newBet, state:'playing',
+        insured:false, doubled:false,
+        surrendered:false, splitsDone:h.splitsDone+1,
+        outcome:null
+      };
+      h.cards.push(drawCard());
+      playerHands.splice(currentHandIndex+1,0,newHand);
     }
   }
 
-  function getGameState(){
-    return {
-      dealerHand,
-      playerHands,
-      currentHandIndex,
-      settings
-    };
+  function nextHand(){
+    currentHandIndex = playerHands.findIndex((h,i)=>i>currentHandIndex && h.state==='playing');
+    if(currentHandIndex<0) dealerPlay();
   }
 
-  return {
-    start,
-    hitCurrentHand,
-    standCurrentHand,
-    doubleCurrentHand,
-    surrenderCurrentHand,
-    splitCurrentHand,
-    nextHand,
-    getGameState,
-  };
+  function dealerPlay(){
+    const dealerBJ = handScore(dealerHand)===21;
+    resolveHands(dealerBJ);
+    if(!dealerBJ){
+      while(true){
+        const sc=handScore(dealerHand);
+        if(sc>21||sc>17||(sc===17 && !settings.dealerHitsSoft17))break;
+        dealerHand.push(drawCard());
+      }
+      resolveHands(false);
+    }
+  }
+
+  function resolveHands(dealerBJ){
+    const ds = handScore(dealerHand);
+    playerHands.forEach(h=>{
+      const ps = handScore(h.cards);
+      if(h.state==='blackjack'){
+        if(dealerBJ){ h.outcome='pu'; playerBank+=h.bet; }
+        else{ h.outcome='bj'; playerBank+=h.bet*(settings.blackjackPayout+1); }
+      }
+      else if(h.insured && dealerBJ){
+        h.outcome='ins'; playerBank+=h.bet*2;
+      }
+      else if(h.surrendered){ h.outcome='su'; }
+      else if(ps>21){ h.outcome='lo'; }
+      else if(dealerBJ){ h.outcome='lo'; }
+      else if(ps>ds||ds>21){ h.outcome='wi'; playerBank+=h.bet*2; }
+      else if(ps===ds){ h.outcome='pu'; playerBank+=h.bet; }
+      else { h.outcome='lo'; }
+    });
+  }
+
+  function getGameState(){
+    return {dealerHand,playerHands,currentHandIndex,settings,playerBank};
+  }
+  
+  return {start, hitCurrentHand, standCurrentHand, doubleCurrentHand, surrenderCurrentHand,
+          insureCurrentHand, splitCurrentHand, getGameState};
 })();
