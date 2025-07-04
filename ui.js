@@ -43,7 +43,7 @@ export const UI = (() => {
   // Render function for hand cards with corrected image paths
   function renderHandCards(hand, container, hideDealerFirstCard = false) {
     container.innerHTML = '';
-    
+  
     hand.forEach((c, index) => {
       const img = document.createElement('img');
       const suit = c.suit === 'S' ? 'spades' :
@@ -57,14 +57,6 @@ export const UI = (() => {
       // If it's the dealer's first card and we are hiding it, show a back of the card
       if (hideDealerFirstCard && index === 0) {
         img.src = 'cards/card_back.png'; // Face down card
-        img.classList.add('card');
-        container.appendChild(img);
-        return;
-      }
-  
-      // Show actual card for both dealer and player (and dealer second card after player's turn)
-      if (index === 1 && !c.faceUp) {
-        img.src = 'cards/card_back.png'; // Face down card for second card (dealer)
       } else {
         img.src = `cards/card_${suit}_${cardValue}.png`; // Actual card image
       }
@@ -74,14 +66,15 @@ export const UI = (() => {
     });
   }
 
-
   function update() {
     const s = Game.getGameState();
     dealerScoreEl.textContent = handScore(s.dealerHand);
   
-    // For dealer, only hide the first card during the player's turn
+    // Only hide the first card if there is any player's hand still in the 'playing' state
     const hideDealerFirstCard = s.playerHands.some(hand => hand.state === 'playing');
-    renderHandCards(s.dealerHand, dealerCardsEl, hideDealerFirstCard); // Pass `hideDealerFirstCard` flag
+    
+    // Render the dealer's cards with the correct visibility logic
+    renderHandCards(s.dealerHand, dealerCardsEl, hideDealerFirstCard);
   
     playerSectionEl.innerHTML = '';
     s.playerHands.forEach((h, idx) => {
@@ -102,8 +95,7 @@ export const UI = (() => {
     buttons.split.disabled = !cur || cur.state !== 'playing' || !Game.canSplit?.(cur);
     buttons.surrender.disabled = !cur || cur.state !== 'playing' || !s.settings.lateSurrender;
   }
-
-
+  console.log("Hide Dealer First Card:", hideDealerFirstCard);
   function handScore(hand){
     let score = hand.reduce((a,c)=>a+cardValue(c),0);
     let aces = hand.filter(c=>c.value==="A").length;
