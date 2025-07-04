@@ -6,29 +6,27 @@ const settingsForm = document.getElementById('settings-form');
 const settingsContainer = document.getElementById('settings-container');
 const gameContainer = document.getElementById('game-container');
 
-export let currentSettings = null;  // Exported for access from other modules
+export let currentSettings = null;
 
 settingsForm.addEventListener('submit', e => {
   e.preventDefault();
-
-  const formData = new FormData(settingsForm);
-
+  const f = new FormData(settingsForm);
   currentSettings = {
-    numberOfHands: parseInt(formData.get('hands')),
-    lateSurrender: formData.get('lateSurrender') === 'on' || formData.get('lateSurrender') === true || formData.get('lateSurrender') === 'true',
-    blackjackPayout: parseFloat(formData.get('payout')),
-    insurance: formData.get('insurance') === 'yes',
-    dealerHitsSoft17: formData.get('dealer17') === 'hit',
-    doubleAfterSplit: formData.get('doubleAfterSplit') === 'yes',
-    maxSplitHands: parseInt(formData.get('splitHands')),
-    resplitAces: formData.get('resplitAces') === 'yes',
-    splitAcesDrawOneCardOnly: formData.get('splitAcesDrawOne') === 'yes'
+    numberOfHands: parseInt(f.get('hands')),
+    lateSurrender: f.get('lateSurrender') === 'on',
+    blackjackPayout: parseFloat(f.get('payout')),
+    insurance: f.get('insurance') === 'yes',
+    dealerHitsSoft17: f.get('dealer17') === 'hit',
+    doubleAfterSplit: f.get('doubleAfterSplit') === 'yes',
+    maxSplitHands: parseInt(f.get('splitHands')),
+    resplitAces: f.get('resplitAces') === 'yes',
+    splitAcesDrawOneCardOnly: f.get('splitAcesDrawOne') === 'yes',
+    startingChips: parseInt(f.get('startingChips')),
+    initialBet: parseInt(f.get('initialBet'))
   };
 
-  // Hide settings UI, show game UI
   settingsContainer.style.display = 'none';
   gameContainer.style.display = 'block';
-
   Game.start(currentSettings);
   UI.init(Game, gameContainer);
 });
