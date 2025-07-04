@@ -74,10 +74,10 @@ function displayHands() {
     dealerTotalContainer.textContent = `Total: ${calculateTotal(dealerHand)}`;
 }
 
-// Format the card value (prepend '0' for values 2-9, except for 10)
+// Format the card value (prepend '0' for values 2-9, except for 10, J, Q, K, A)
 function formatCardValue(value) {
-    if (value > 0 && value < 10) {
-        return value; // No leading zero needed for 10 or Facecards
+    if (['A', 'J', 'Q', 'K', '10'].includes(value)) {
+        return value; // No leading zero for A, J, Q, K, or 10
     }
     return value.padStart(2, '0'); // Add leading zero for 2-9
 }
