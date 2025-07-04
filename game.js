@@ -128,10 +128,16 @@ function stand() {
 // Dealer's turn: Dealer hits until total is 17 or higher
 function dealerTurn() {
     let dealerTotal = calculateTotal(dealerHand);
+    const dealerCardsContainer = document.getElementById('dealer-cards');
+
+    // Draw cards for the dealer while the total is below 17
     while (dealerTotal < 17) {
-        dealerHand.push(drawCard());
+        const card = drawCard();
+        dealerHand.push(card);
+        dealerCardsContainer.innerHTML += `<img src="cards/card_${card.suit}_${formatCardValue(card.value)}.png" alt="${card.value} of ${card.suit}" />`;
         dealerTotal = calculateTotal(dealerHand);
-        displayHands(); // Update display with each new card drawn
+        // Update the dealer's total after each card is drawn
+        document.getElementById('dealer-total').textContent = `Total: ${dealerTotal}`;
     }
 
     // After dealer stands, check who wins
