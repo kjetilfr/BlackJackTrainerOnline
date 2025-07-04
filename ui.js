@@ -50,14 +50,13 @@ export const UI = (() => {
                    c.suit === 'H' ? 'hearts' :
                    c.suit === 'D' ? 'diamonds' : 'clubs';
 
-      // Fix card value formatting: no leading zero for face cards, add for numbers
-      let cardValue = c.value === 'A' ? 'A' :
-                      c.value === 'J' ? 'J' :
-                      c.value === 'Q' ? 'Q' :
-                      c.value === 'K' ? 'K' :
-                      c.value.padStart(2, '0'); // pad only for numeric cards
+      // Corrected card value formatting: 
+      // No leading zero for face cards (J, Q, K, A)
+      let cardValue = c.value === 'A' || c.value === 'J' || c.value === 'Q' || c.value === 'K'
+                      ? c.value
+                      : c.value.padStart(2, '0');  // pad numbers (2-10) with leading 0 if needed
 
-      img.src = `cards/card_${suit}_${cardValue}.png`;
+      img.src = `cards/card_${suit}_${cardValue}.png`;  // Use the correct card image path
       img.classList.add('card');
       container.appendChild(img);
     });
