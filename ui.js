@@ -48,7 +48,8 @@ export const UI = (() => {
       const suit = c.suit === 'S' ? 'spades' :
                    c.suit === 'H' ? 'hearts' :
                    c.suit === 'D' ? 'diamonds' : 'clubs';
-      const val = c.value.padStart(2,'0');
+      // Format value correctly for cards: "J", "Q", "K", "A" should not have leading zeros
+      const val = c.value === 'A' ? 'A' : c.value.padStart(2, '0');
       img.src = `cards/card_${suit}_${val}.png`;
       img.classList.add('card');
       container.appendChild(img);
