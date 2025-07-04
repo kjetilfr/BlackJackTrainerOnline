@@ -9,6 +9,7 @@
 <body>
     <div id="settings-page">
         <h2>Blackjack Settings</h2>
+        <!-- Shoe size-->
         <label for="shoe-size">Select Shoe Size (Decks):</label>
         <select id="shoe-size">
             <option value="2">2 Decks</option>
@@ -20,30 +21,50 @@
             <option value="8">8 Decks</option>
         </select>
         <button onclick="startGame()">Start Game</button>
+
+        <!-- Dropdown to select the number of hands (1 to 4) -->
+        <label for="num-hands">Select number of hands:</label>
+        <select id="num-hands">
+            <option value="1">1 Hand</option>
+            <option value="2">2 Hands</option>
+            <option value="3">3 Hands</option>
+            <option value="4">4 Hands</option>
+        </select>
+
     </div>
 
+
     <div id="game-page" style="display: none;">
+
         <h1>Blackjack</h1>
         <div id="result-message"></div>  <!-- This is where we'll show the game result -->
-        
+
         <div id="dealer-hand">
             <h2>Dealer's Hand</h2>
             <div id="dealer-cards"></div>
             <div id="dealer-total"></div> <!-- Dealer total display -->
         </div>
-        
+
         <div id="player-hand">
             <h2>Player's Hand</h2>
             <div id="player-cards"></div>
             <div id="player-total"></div> <!-- Player total display -->
-        </div>    
-        <div id="controls">
-            <button onclick="hit()">Hit</button>
-            <button onclick="stand()">Stand</button>
-            <button id="split-btn" onclick="split()" style="display:none;">Split</button>
         </div>
-    </div>
 
-    <script src="game.js"></script>
+        <!-- Split button container, initially hidden -->
+        <div id="split-btn-container" style="display: none;">
+            <button onclick="split()">Split</button>
+        </div>
+
+        <div id="game-info">
+            <p id="shoe-counter">Cards in Shoe: 0</p>
+            <p id="discard-pile-counter">Cards in Discard Pile: 0</p>
+        </div>
+        <div id="dealer-cards"></div>
+        <div id="dealer-total"></div>
+        <div id="player-cards"></div>
+        <div id="result-message"></div>
+
+        <script src="game.js"></script>
 </body>
-</html>
+    </html>
