@@ -42,19 +42,26 @@ export const UI = (() => {
   }
 
   // Render function for hand cards with corrected image paths
-  function renderHandCards(hand, container){
+  function renderHandCards(hand, container, hideSecondCard = false){
     container.innerHTML = '';
-    hand.forEach(c => {
+    hand.forEach((c, index) => {
       const img = document.createElement('img');
       const suit = c.suit === 'S' ? 'spades' :
                    c.suit === 'H' ? 'hearts' :
                    c.suit === 'D' ? 'diamonds' : 'clubs';
 
       // Corrected card value formatting: 
-      // No leading zero for face cards (J, Q, K, A)
       let cardValue = c.value === 'A' || c.value === 'J' || c.value === 'Q' || c.value === 'K'
                       ? c.value
-                      : c.value.padStart(2, '0');  // pad numbers (2-10) with leading 0 if needed
+                      : c.value.padStart(2, '0'); // pad numbers (2-10) with leading 0 if needed
+
+      // If this is the dealer's second card and we are hiding it, show a back of the card
+      if (hideSecondCard && index === 1) {
+        img.src = 'cards/card_back.png'; // This assumes you have a "card_back.png" image
+        img.classList.add('card');
+        container.appendChild(img);
+        return; // Only append the back of the card for the second card
+      }
 
       img.src = `cards/card_${suit}_${cardValue}.png`;  // Use the correct card image path
       img.classList.add('card');
@@ -65,7 +72,10 @@ export const UI = (() => {
   function update(){
     const s = Game.getGameState();
     dealerScoreEl.textContent = handScore(s.dealerHand);
-    renderHandCards(s.dealerHand, dealerCardsEl);
+    
+    // For dealer, only hide the second card during player's turn
+    const hideSecondCard = s.currentHandIndex === 0 && s.playerHands.some(hand => hand.state === 'playing');
+    renderHandCards(s.dealerHand, dealerCardsEl, hideSecondCard); // Pass `hideSecondCard` flag
 
     playerSectionEl.innerHTML = '';
     s.playerHands.forEach((h, idx) => {
