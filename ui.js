@@ -41,6 +41,7 @@ export const UI = (() => {
     update();
   }
 
+  // Render function for hand cards with corrected image paths
   function renderHandCards(hand, container){
     container.innerHTML = '';
     hand.forEach(c => {
@@ -48,9 +49,15 @@ export const UI = (() => {
       const suit = c.suit === 'S' ? 'spades' :
                    c.suit === 'H' ? 'hearts' :
                    c.suit === 'D' ? 'diamonds' : 'clubs';
-      // Format value correctly for cards: "J", "Q", "K", "A" should not have leading zeros
-      const val = c.value === 'A' ? 'A' : c.value.padStart(2, '0');
-      img.src = `cards/card_${suit}_${val}.png`;
+
+      // Fix card value formatting: no leading zero for face cards, add for numbers
+      let cardValue = c.value === 'A' ? 'A' :
+                      c.value === 'J' ? 'J' :
+                      c.value === 'Q' ? 'Q' :
+                      c.value === 'K' ? 'K' :
+                      c.value.padStart(2, '0'); // pad only for numeric cards
+
+      img.src = `cards/card_${suit}_${cardValue}.png`;
       img.classList.add('card');
       container.appendChild(img);
     });
@@ -87,7 +94,10 @@ export const UI = (() => {
     while(score>21 && aces){ score-=10; aces--; }
     return score;
   }
-  function cardValue(c){ return ["J","Q","K"].includes(c.value)?10:(c.value==="A"?11:parseInt(c.value)); }
+
+  function cardValue(c){
+    return ["J","Q","K"].includes(c.value) ? 10 : (c.value === "A" ? 11 : parseInt(c.value));
+  }
 
   return { init, update };
 })();
