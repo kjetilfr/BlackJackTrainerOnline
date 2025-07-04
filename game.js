@@ -19,11 +19,11 @@ export const Game = (() => {
         deck.push({ value, suit });
       });
     });
-    deck.sort(() => Math.random() - 0.5);
+    deck.sort(() => Math.random() - 0.5); // Shuffle the deck
   }
 
   function drawCard() {
-    if (deck.length === 0) createDeck();
+    if (deck.length === 0) createDeck(); // Recreate deck if empty
     return deck.pop();
   }
 
@@ -57,7 +57,6 @@ export const Game = (() => {
   }
 
   // Initialize game
-
   function start(userSettings) {
     settings = userSettings;
     createDeck();
@@ -160,12 +159,12 @@ export const Game = (() => {
   function dealerPlay() {
     while (true) {
       const score = handScore(dealerHand);
+      const hasAce = dealerHand.some(c => c.value === "A");
+
       if (score > 21) break;
-      if (score > 17) break;
-      if (score === 17) {
-        // Check if soft 17
-        let hasAce = dealerHand.some(c => c.value === "A");
-        if (settings.dealerHitsSoft17 && hasAce) {
+      if (score >= 17) {
+        if (score === 17 && hasAce && settings.dealerHitsSoft17) {
+          // If it's a soft 17 (Ace + 6), hit if dealerHitsSoft17 is true
           dealerHand.push(drawCard());
         } else {
           break;
@@ -175,21 +174,20 @@ export const Game = (() => {
       }
     }
 
-    // Reveal the dealer's second card after the player finishes their turn
+    // Reveal the dealer's second card after the player's turn
     revealDealerCards();
     updateDealerHandScore(); // Update dealer score after revealing the second card
   }
 
   // Revealing both dealer cards after player finished their turn
   function revealDealerCards() {
-    // Set dealer's second card visible after player's turn
-    dealerHand[1].faceUp = true; // Add a property for the second card being revealed
+    dealerHand[1].faceUp = true; // Reveal second card
   }
 
   function nextHand() {
     do {
       currentHandIndex++;
-    } while (currentHandIndex < playerHands.length && playerHands[currentHandIndex].state !== "playing");
+    } while (currentHandIndex < playerHands.length && (playerHands[currentHandIndex].state === "busted" || playerHands[currentHandIndex].state === "stood"));
 
     if (currentHandIndex >= playerHands.length) {
       dealerPlay();
