@@ -1,6 +1,8 @@
 // Array for card values and suits
 const suits = ['hearts', 'diamonds', 'clubs', 'spades'];
 const values = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
+// Map face cards (J, Q, K) to their numeric values for splitting purposes
+const faceCardValue = { 'J': 10, 'Q': 10, 'K': 10, '10': 10 };
 
 let shoe = [];
 let playerHands = [];  // Now we will manage multiple hands
@@ -141,9 +143,23 @@ function stand() {
     dealerTurn();
 }
 
-// Split the hand if the player has two identical cards
+// Function to check if two cards can be split (if they have the same value)
+function canSplit(card1, card2) {
+    return getCardValue(card1) === getCardValue(card2);
+}
+
+// Helper function to get the numeric value of a card
+function getCardValue(card) {
+    if (['J', 'Q', 'K', '10'].includes(card.value)) {
+        return 10;
+    }
+    return parseInt(card.value); // For numbered cards 2-9
+}
+
+// Split the hand if the player has two identical value cards
 function split() {
-    if (playerHands[0].length === 2 && playerHands[0][0].value === playerHands[0][1].value) {
+    // Ensure the player can only split if they have two cards and they are of the same value
+    if (playerHands[0].length === 2 && canSplit(playerHands[0][0], playerHands[0][1])) {
         // Create a second hand
         const secondHand = [playerHands[0].pop(), drawCard()];
         playerHands.push(secondHand);
@@ -152,6 +168,7 @@ function split() {
     displayHands();
     document.getElementById('split-btn').style.display = 'none';  // Hide split button after splitting
 }
+
 
 // Dealer's turn: Dealer hits until total is 17 or higher
 function dealerTurn() {
