@@ -6,12 +6,14 @@ const settingsForm = document.getElementById('settings-form');
 const settingsContainer = document.getElementById('settings-container');
 const gameContainer = document.getElementById('game-container');
 
+export let currentSettings = null;  // Exported for access from other modules
+
 settingsForm.addEventListener('submit', e => {
   e.preventDefault();
 
   const formData = new FormData(settingsForm);
 
-  const settings = {
+  currentSettings = {
     numberOfHands: parseInt(formData.get('hands')),
     lateSurrender: formData.get('lateSurrender') === 'on' || formData.get('lateSurrender') === true || formData.get('lateSurrender') === 'true',
     blackjackPayout: parseFloat(formData.get('payout')),
@@ -27,7 +29,6 @@ settingsForm.addEventListener('submit', e => {
   settingsContainer.style.display = 'none';
   gameContainer.style.display = 'block';
 
-  // Start the game with the chosen settings
-  Game.start(settings);
+  Game.start(currentSettings);
   UI.init(Game, gameContainer);
 });
