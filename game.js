@@ -1,11 +1,5 @@
-// Array for card values and suits
-const suits = ['hearts', 'diamonds', 'clubs', 'spades'];
-const values = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
-
-let shoe = [];
-let playerHand = [];
-let dealerHand = [];
-let deckCount = 6; // Default shoe size (6 decks)
+let playerHands = [];  // Now we will manage multiple hands
+let splitHand = false;  // Track whether the player has split
 
 // Initialize the game by setting up the shoe
 function startGame() {
@@ -15,35 +9,25 @@ function startGame() {
     document.getElementById('settings-page').style.display = 'none';
     document.getElementById('game-page').style.display = 'block';
     document.getElementById('result-message').innerHTML = '';  // Clear previous results
+    playerHands = [];  // Reset hands
+    splitHand = false; // Reset split condition
     dealCards();
-}
-
-// Create the shoe with the specified number of decks
-function createShoe(numDecks) {
-    shoe = [];
-    for (let i = 0; i < numDecks; i++) {
-        for (let suit of suits) {
-            for (let value of values) {
-                shoe.push({ suit: suit, value: value });
-            }
-        }
-    }
-    shuffleShoe();
-}
-
-// Shuffle the shoe
-function shuffleShoe() {
-    for (let i = shoe.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [shoe[i], shoe[j]] = [shoe[j], shoe[i]];
-    }
 }
 
 // Deal initial cards
 function dealCards() {
-    playerHand = [drawCard(), drawCard()];
+    playerHands = [
+        [drawCard(), drawCard()]
+    ];
     dealerHand = [drawCard(), drawCard()];
     displayHands();
+    
+    // Show split button if the player can split
+    if (playerHands[0][0].value === playerHands[0][1].value) {
+        document.getElementById('split-btn').style.display = 'inline-block';
+    } else {
+        document.getElementById('split-btn').style.display = 'none';
+    }
 }
 
 // Draw a card from the shoe
@@ -57,60 +41,30 @@ function displayHands() {
     const dealerCardsContainer = document.getElementById('dealer-cards');
     const playerTotalContainer = document.getElementById('player-total');
     const dealerTotalContainer = document.getElementById('dealer-total');
-
+    
     playerCardsContainer.innerHTML = '';
     dealerCardsContainer.innerHTML = '';
-
-    // Display player cards
-    playerHand.forEach(card => {
-        playerCardsContainer.innerHTML += `<img src="cards/card_${card.suit}_${formatCardValue(card.value)}.png" alt="${card.value} of ${card.suit}" />`;
+    
+    // Display player's hands
+    playerHands.forEach((hand, index) => {
+        hand.forEach(card => {
+            playerCardsContainer.innerHTML += `<img src="cards/card_${card.suit}_${formatCardValue(card.value)}.png" alt="${card.value} of ${card.suit}" />`;
+        });
+        playerCardsContainer.innerHTML += `<br>Hand ${index + 1}: Total: ${calculateTotal(hand)}<br>`;
     });
 
     // Display dealer's cards (hide the first card initially)
     dealerCardsContainer.innerHTML += `<img src="cards/card_back.png" alt="Dealer's hidden card" />`; // Hide first card
     dealerCardsContainer.innerHTML += `<img src="cards/card_${dealerHand[1].suit}_${formatCardValue(dealerHand[1].value)}.png" alt="${dealerHand[1].value} of ${dealerHand[1].suit}" />`; // Show second card
-
+    
     // Display totals
-    playerTotalContainer.textContent = `Total: ${calculateTotal(playerHand)}`;
+    playerTotalContainer.textContent = `Total: ${calculateTotal(playerHands[0])}`;
     dealerTotalContainer.textContent = `Total: ${calculateTotal([dealerHand[1]])}`; // Show total for face-up card only
 }
 
-// Format the card value (prepend '0' for values 2-9, except for 10, J, Q, K, A)
-function formatCardValue(value) {
-    if (['A', 'J', 'Q', 'K', '10'].includes(value)) {
-        return value; // No leading zero for A, J, Q, K, or 10
-    }
-    return value.padStart(2, '0'); // Add leading zero for 2-9
-}
-
-// Calculate the total value of a hand
-function calculateTotal(hand) {
-    let total = 0;
-    let aceCount = 0;
-
-    hand.forEach(card => {
-        if (['J', 'Q', 'K'].includes(card.value)) {
-            total += 10;
-        } else if (card.value === 'A') {
-            aceCount += 1;
-            total += 11; // Initially treat Ace as 11
-        } else {
-            total += parseInt(card.value); // Add the card's value
-        }
-    });
-
-    // Adjust for Aces: If the total is over 21 and we have Aces, treat them as 1
-    while (total > 21 && aceCount > 0) {
-        total -= 10; // Adjust Ace from 11 to 1
-        aceCount -= 1;
-    }
-
-    return total;
-}
-
 // Player hits (draws a card)
-function hit() {
-    playerHand.push(drawCard());
+function hit(handIndex) {
+    playerHands[handIndex].push(drawCard());
     displayHands();
 }
 
@@ -124,6 +78,18 @@ function stand() {
 
     // Dealer's turn logic
     dealerTurn();
+}
+
+// Split the hand if the player has two identical cards
+function split() {
+    if (playerHands[0].length === 2 && playerHands[0][0].value === playerHands[0][1].value) {
+        // Create a second hand
+        const secondHand = [playerHands[0].pop(), drawCard()];
+        playerHands.push(secondHand);
+        splitHand = true;
+    }
+    displayHands();
+    document.getElementById('split-btn').style.display = 'none'; // Hide split button after splitting
 }
 
 // Dealer's turn: Dealer hits until total is 17 or higher
@@ -147,22 +113,24 @@ function dealerTurn() {
 
 // Determine the winner based on hand totals
 function determineWinner() {
-    const playerTotal = calculateTotal(playerHand);
+    const playerTotals = playerHands.map(hand => calculateTotal(hand));
     const dealerTotal = calculateTotal(dealerHand);
 
     let resultMessage = '';
 
-    if (playerTotal > 21) {
-        resultMessage = 'Player busts! Dealer wins.';
-    } else if (dealerTotal > 21) {
-        resultMessage = 'Dealer busts! Player wins.';
-    } else if (playerTotal > dealerTotal) {
-        resultMessage = 'Player wins!';
-    } else if (dealerTotal > playerTotal) {
-        resultMessage = 'Dealer wins!';
-    } else {
-        resultMessage = 'It\'s a tie!';
-    }
+    playerTotals.forEach((playerTotal, index) => {
+        if (playerTotal > 21) {
+            resultMessage += `Hand ${index + 1}: Player busts! Dealer wins.<br>`;
+        } else if (dealerTotal > 21) {
+            resultMessage += `Hand ${index + 1}: Dealer busts! Player wins.<br>`;
+        } else if (playerTotal > dealerTotal) {
+            resultMessage += `Hand ${index + 1}: Player wins!<br>`;
+        } else if (dealerTotal > playerTotal) {
+            resultMessage += `Hand ${index + 1}: Dealer wins.<br>`;
+        } else {
+            resultMessage += `Hand ${index + 1}: It's a tie!<br>`;
+        }
+    });
 
     // Show result message on the screen
     document.getElementById('result-message').innerHTML = `<h3>${resultMessage}</h3>`;
