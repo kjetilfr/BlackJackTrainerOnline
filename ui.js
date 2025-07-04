@@ -42,8 +42,9 @@ export const UI = (() => {
   }
 
   // Render function for hand cards with corrected image paths
-  function renderHandCards(hand, container, hideDealerFirstCard = false){
+  function renderHandCards(hand, container, hideDealerFirstCard = false) {
     container.innerHTML = '';
+    
     hand.forEach((c, index) => {
       const img = document.createElement('img');
       const suit = c.suit === 'S' ? 'spades' :
@@ -62,10 +63,18 @@ export const UI = (() => {
         return;
       }
   
-      // If the card is the dealer's second card and it has been marked faceUp, show it
+      // Show face up cards for the dealer
       if (index === 1 && !c.faceUp) {
         img.src = 'cards/card_back.png'; // Face down card for second card
+      } else {
+        img.src = `cards/card_${suit}_${cardValue}.png`; // Actual card image
       }
+  
+      img.classList.add('card');
+      container.appendChild(img);
+    });
+  }
+
 
 
   function update(){
