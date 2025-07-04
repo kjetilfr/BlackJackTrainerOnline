@@ -3,32 +3,101 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Blackjack - Multi-Hand</title>
+<title>Blackjack with Settings</title>
 <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <h1>Blackjack - Play up to 4 Hands</h1>
 
-  <div id="dealer-section" class="hand-section">
-    <h2>Dealer's Hand (<span id="dealer-score">0</span>)</h2>
-    <div id="dealer-cards" class="hand-cards"></div>
+  <h1>Blackjack Game with Custom Settings</h1>
+
+  <div id="settings-container">
+    <h2>Game Settings</h2>
+    <form id="settings-form">
+
+      <label>
+        Number of Hands:
+        <select id="hands-select" name="hands">
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3" selected>3</option>
+          <option value="4">4</option>
+        </select>
+      </label>
+
+      <label>
+        Late Surrender:
+        <input type="checkbox" id="late-surrender" name="lateSurrender" />
+      </label>
+
+      <label>
+        BlackJack Payout:
+        <select id="payout-select" name="payout">
+          <option value="2">2:1</option>
+          <option value="1.5" selected>3:2</option>
+          <option value="1.2">6:5</option>
+        </select>
+      </label>
+
+      <label>
+        Insurance:
+        <select id="insurance-select" name="insurance">
+          <option value="yes" selected>Yes</option>
+          <option value="no">No</option>
+        </select>
+      </label>
+
+      <label>
+        Dealer 17:
+        <select id="dealer17-select" name="dealer17">
+          <option value="stand" selected>Stand on Soft 17</option>
+          <option value="hit">Hit on Soft 17</option>
+        </select>
+      </label>
+
+      <label>
+        Double After Split:
+        <select id="double-split-select" name="doubleAfterSplit">
+          <option value="yes" selected>Yes</option>
+          <option value="no">No</option>
+        </select>
+      </label>
+
+      <label>
+        Split to Hands:
+        <select id="split-hands-select" name="splitHands">
+          <option value="2" selected>2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+        </select>
+      </label>
+
+      <label>
+        Resplitting Aces:
+        <select id="resplit-aces-select" name="resplitAces">
+          <option value="yes">Yes</option>
+          <option value="no" selected>No</option>
+        </select>
+      </label>
+
+      <label>
+        Split Aces Draw 1 Card Only:
+        <select id="split-aces-draw-select" name="splitAcesDrawOne">
+          <option value="yes" selected>Yes</option>
+          <option value="no">No</option>
+        </select>
+      </label>
+
+      <button type="submit" id="start-game-btn">Start Game</button>
+    </form>
   </div>
 
-  <div id="player-section">
-    <!-- Player hands will be rendered here dynamically -->
+  <div id="game-container" style="display:none;">
+    <!-- The blackjack game UI will be rendered here -->
   </div>
 
-  <div class="controls">
-    <label for="hand-count">Number of Hands:</label>
-        <select id="hand-count" aria-label="Select number of hands">
-      <option value="1">1</option>
-      <option value="2">2</option>
-      <option value="3" selected>3</option>
-      <option value="4">4</option>
-    </select>
-    <button id="restart-btn">Restart Game</button>
-  </div>
+  <script type="module" src="settings.js"></script>
+  <script type="module" src="game.js"></script>
+  <script type="module" src="ui.js"></script>
 
-  <script src="script.js"></script>
 </body>
 </html>
