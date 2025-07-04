@@ -79,14 +79,18 @@ export const Game = (() => {
   }
 
   function hitCurrentHand(){
-    if(currentHandIndex >= playerHands.length) return;
-    const hand = playerHands[currentHandIndex];
-    if(hand.state !== 'playing') return;
+  if(currentHandIndex >= playerHands.length) return;
+  const hand = playerHands[currentHandIndex];
+  if(hand.state !== 'playing') return;
 
-    hand.cards.push(drawCard());
-    const score = handScore(hand.cards);
-    if(score > 21) hand.state = 'busted';
+  hand.cards.push(drawCard());
+  const score = handScore(hand.cards);
+  if(score > 21) {
+    hand.state = 'busted';
+    nextHand(); // 🛠️ Move to next hand automatically
   }
+}
+
 
   function standCurrentHand(){
     if(currentHandIndex >= playerHands.length) return;
@@ -94,29 +98,34 @@ export const Game = (() => {
   }
 
   function doubleCurrentHand(){
-    if(currentHandIndex >= playerHands.length) return;
-    const hand = playerHands[currentHandIndex];
-    if(hand.state !== 'playing' || hand.cards.length !== 2) return;
-    hand.bet *= 2;
-    hand.doubled = true;
-    hand.cards.push(drawCard());
-    const score = handScore(hand.cards);
-    if(score > 21) hand.state = 'busted';
-    else hand.state = 'stood';
-  }
+  if(currentHandIndex >= playerHands.length) return;
+  const hand = playerHands[currentHandIndex];
+  if(hand.state !== 'playing' || hand.cards.length !== 2) return;
+
+  hand.bet *= 2;
+  hand.doubled = true;
+  hand.cards.push(drawCard());
+
+  const score = handScore(hand.cards);
+  hand.state = (score > 21) ? 'busted' : 'stood';
+
+  nextHand(); // 🛠️ Always advance after double
+}
+
 
   function surrenderCurrentHand(){
-    if(currentHandIndex >= playerHands.length) return;
-    const hand = playerHands[currentHandIndex];
-    if(hand.state !== 'playing') return;
-    if(settings.lateSurrender){
-      // Late surrender allowed only first turn before any other action
-      if(hand.cards.length === 2) {
-        hand.surrendered = true;
-        hand.state = 'surrendered';
-      }
+  if(currentHandIndex >= playerHands.length) return;
+  const hand = playerHands[currentHandIndex];
+  if(hand.state !== 'playing') return;
+  if(settings.lateSurrender){
+    if(hand.cards.length === 2) {
+      hand.surrendered = true;
+      hand.state = 'surrendered';
+      nextHand(); // 🛠️ Surrender ends the hand
     }
   }
+}
+
 
   function splitCurrentHand(){
     if(currentHandIndex >= playerHands.length) return;
