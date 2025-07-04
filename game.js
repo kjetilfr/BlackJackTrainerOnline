@@ -14,6 +14,7 @@ function startGame() {
     createShoe(deckCount);
     document.getElementById('settings-page').style.display = 'none';
     document.getElementById('game-page').style.display = 'block';
+    document.getElementById('result-message').innerHTML = '';  // Clear previous results
     dealCards();
 }
 
@@ -65,13 +66,13 @@ function displayHands() {
         playerCardsContainer.innerHTML += `<img src="cards/card_${card.suit}_${formatCardValue(card.value)}.png" alt="${card.value} of ${card.suit}" />`;
     });
 
-    // Display dealer's cards (hide the first card)
+    // Display dealer's cards (hide the first card initially)
     dealerCardsContainer.innerHTML += `<img src="cards/card_back.png" alt="Dealer's hidden card" />`; // Hide first card
     dealerCardsContainer.innerHTML += `<img src="cards/card_${dealerHand[1].suit}_${formatCardValue(dealerHand[1].value)}.png" alt="${dealerHand[1].value} of ${dealerHand[1].suit}" />`; // Show second card
 
     // Display totals
     playerTotalContainer.textContent = `Total: ${calculateTotal(playerHand)}`;
-    dealerTotalContainer.textContent = `Total: ${calculateTotal(dealerHand)}`;
+    dealerTotalContainer.textContent = `Total: ${calculateTotal([dealerHand[1]])}`; // Show total for face-up card only
 }
 
 // Format the card value (prepend '0' for values 2-9, except for 10, J, Q, K, A)
@@ -127,7 +128,7 @@ function stand() {
 
 // Dealer's turn: Dealer hits until total is 17 or higher
 function dealerTurn() {
-    let dealerTotal = calculateTotal(dealerHand);
+    let dealerTotal = calculateTotal([dealerHand[1]]); // Start with only the face-up card
     const dealerCardsContainer = document.getElementById('dealer-cards');
 
     // Draw cards for the dealer while the total is below 17
@@ -163,5 +164,6 @@ function determineWinner() {
         resultMessage = 'It\'s a tie!';
     }
 
-    alert(resultMessage);
+    // Show result message on the screen
+    document.getElementById('result-message').innerHTML = `<h3>${resultMessage}</h3>`;
 }
