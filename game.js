@@ -34,12 +34,25 @@ export const Game = (() => {
   }
 
   function handScore(hand) {
-    let score = hand.reduce((acc, c) => acc + cardValue(c), 0);
-    let aces = hand.filter(c => c.value === "A").length;
+    let score = 0;
+    let aces = 0;
+  
+    // Sum up values of the cards, but ignore face-down cards
+    hand.forEach(card => {
+      if (card.faceUp === undefined || card.faceUp === true) {
+        score += cardValue(card);
+        if (card.value === "A") {
+          aces++;
+        }
+      }
+    });
+  
+    // Adjust for aces
     while (score > 21 && aces > 0) {
       score -= 10;
       aces--;
     }
+  
     return score;
   }
 
