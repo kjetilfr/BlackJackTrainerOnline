@@ -1,32 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Blackjack with Style 🎴</title>
-  <link rel="stylesheet" href="styles.css" />
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Blackjack - Multi-Hand</title>
+<link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <h1>Blackjack</h1>
+  <h1>Blackjack - Play up to 4 Hands</h1>
 
-  <div class="hand-section">
-    <div class="hand">
-      <h2>Your Hand (<span id="player-score">0</span>)</h2>
-      <div id="player-cards" class="hand-cards"></div>
-    </div>
-    <div class="hand">
-      <h2>Dealer's Hand (<span id="dealer-score">0</span>)</h2>
-      <div id="dealer-cards" class="hand-cards"></div>
-    </div>
+  <div id="dealer-section" class="hand-section">
+    <h2>Dealer's Hand (<span id="dealer-score">0</span>)</h2>
+    <div id="dealer-cards" class="hand-cards"></div>
+  </div>
+
+  <div id="player-section">
+    <!-- Player hands will be rendered here dynamically -->
   </div>
 
   <div class="controls">
-    <button id="hit-btn">Hit</button>
-    <button id="stand-btn">Stand</button>
-    <button id="restart-btn">Restart</button>
+    <label for="hand-count">Number of Hands:</label>
+    <select id="hand-count" aria-label="Select number of hands">
+      <option value="1" selected>1</option>
+      <option value="2">2</option>
+      <option value="3">3</option>
+      <option value="4">4</option>
+    </select>
+    <button id="restart-btn">Restart Game</button>
   </div>
-
-  <h2 id="result" class="result-text"></h2>
 
   <script src="script.js"></script>
 </body>
