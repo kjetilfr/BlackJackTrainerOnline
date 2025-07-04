@@ -36,7 +36,7 @@ export const Game = (() => {
   function handScore(hand) {
     let score = 0;
     let aces = 0;
-  
+
     // Sum up values of the cards, but ignore face-down cards
     hand.forEach(card => {
       if (card.faceUp === undefined || card.faceUp === true) {
@@ -46,13 +46,13 @@ export const Game = (() => {
         }
       }
     });
-  
+
     // Adjust for aces
     while (score > 21 && aces > 0) {
       score -= 10;
       aces--;
     }
-  
+
     return score;
   }
 
@@ -174,6 +174,10 @@ export const Game = (() => {
         dealerHand.push(drawCard());
       }
     }
+
+    // Reveal the dealer's second card after the player finishes their turn
+    revealDealerCards();
+    updateDealerHandScore(); // Update dealer score after revealing the second card
   }
 
   // Revealing both dealer cards after player finished their turn
@@ -189,7 +193,6 @@ export const Game = (() => {
 
     if (currentHandIndex >= playerHands.length) {
       dealerPlay();
-      revealDealerCards(); // Make sure dealer's second card is revealed after player actions
     }
   }
 
