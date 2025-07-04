@@ -1,4 +1,3 @@
-// ui.js
 import { Game } from './game.js';
 import { currentSettings } from './settings.js';
 
@@ -74,8 +73,6 @@ export const UI = (() => {
       container.appendChild(img);
     });
   }
-
-
 
   function update(){
     const s = Game.getGameState();
