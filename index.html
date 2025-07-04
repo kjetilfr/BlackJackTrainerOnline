@@ -1,103 +1,57 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Blackjack with Settings</title>
-<link rel="stylesheet" href="styles.css" />
-</head>
 <body>
-
-  <h1>Blackjack Game with Custom Settings</h1>
-
   <div id="settings-container">
-    <h2>Game Settings</h2>
     <form id="settings-form">
-
-      <label>
-        Number of Hands:
-        <select id="hands-select" name="hands">
-          <option value="1">1</option>
-          <option value="2">2</option>
-          <option value="3" selected>3</option>
-          <option value="4">4</option>
-        </select>
+      <label>Number of hands (1-4):
+        <input type="number" name="hands" min="1" max="4" value="3" />
       </label>
-
-      <label>
-        Late Surrender:
-        <input type="checkbox" id="late-surrender" name="lateSurrender" />
+      <label>Late Surrender:
+        <input type="checkbox" name="lateSurrender" />
       </label>
-
-      <label>
-        BlackJack Payout:
-        <select id="payout-select" name="payout">
+      <label>Blackjack Payout:
+        <select name="payout">
           <option value="2">2:1</option>
           <option value="1.5" selected>3:2</option>
           <option value="1.2">6:5</option>
         </select>
       </label>
-
-      <label>
-        Insurance:
-        <select id="insurance-select" name="insurance">
-          <option value="yes" selected>Yes</option>
-          <option value="no">No</option>
-        </select>
-      </label>
-
-      <label>
-        Dealer 17:
-        <select id="dealer17-select" name="dealer17">
-          <option value="stand" selected>Stand on Soft 17</option>
-          <option value="hit">Hit on Soft 17</option>
-        </select>
-      </label>
-
-      <label>
-        Double After Split:
-        <select id="double-split-select" name="doubleAfterSplit">
-          <option value="yes" selected>Yes</option>
-          <option value="no">No</option>
-        </select>
-      </label>
-
-      <label>
-        Split to Hands:
-        <select id="split-hands-select" name="splitHands">
-          <option value="2" selected>2</option>
-          <option value="3">3</option>
-          <option value="4">4</option>
-        </select>
-      </label>
-
-      <label>
-        Resplitting Aces:
-        <select id="resplit-aces-select" name="resplitAces">
+      <label>Insurance:
+        <select name="insurance">
           <option value="yes">Yes</option>
           <option value="no" selected>No</option>
         </select>
       </label>
-
-      <label>
-        Split Aces Draw 1 Card Only:
-        <select id="split-aces-draw-select" name="splitAcesDrawOne">
+      <label>Dealer 17:
+        <select name="dealer17">
+          <option value="hit">Hit</option>
+          <option value="stand" selected>Stand</option>
+        </select>
+      </label>
+      <label>Double After Split:
+        <select name="doubleAfterSplit">
           <option value="yes" selected>Yes</option>
           <option value="no">No</option>
         </select>
       </label>
-
-      <button type="submit" id="start-game-btn">Start Game</button>
+      <label>Split to hands (2-4):
+        <input type="number" name="splitHands" min="2" max="4" value="2" />
+      </label>
+      <label>Resplitting Aces:
+        <select name="resplitAces">
+          <option value="yes" selected>Yes</option>
+          <option value="no">No</option>
+        </select>
+      </label>
+      <label>Split Aces Draw 1 card only:
+        <select name="splitAcesDrawOne">
+          <option value="yes" selected>Yes</option>
+          <option value="no">No</option>
+        </select>
+      </label>
+      <button type="submit">Start Game</button>
     </form>
   </div>
 
-  <div id="game-container" style="display:none;">
-    <!-- The blackjack game UI will be rendered here -->
-  </div>
+  <div id="game-container" style="display:none;"></div>
 
-  <script type="module" src="settings.js"></script>
-  <script type="module" src="game.js"></script>
-  <script type="module" src="ui.js"></script>
-
+  <script type="module" src="./settings.js"></script>
 </body>
-</html>
