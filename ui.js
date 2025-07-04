@@ -62,9 +62,9 @@ export const UI = (() => {
         return;
       }
   
-      // Show face up cards for the dealer
+      // Show actual card for both dealer and player (and dealer second card after player's turn)
       if (index === 1 && !c.faceUp) {
-        img.src = 'cards/card_back.png'; // Face down card for second card
+        img.src = 'cards/card_back.png'; // Face down card for second card (dealer)
       } else {
         img.src = `cards/card_${suit}_${cardValue}.png`; // Actual card image
       }
@@ -73,6 +73,7 @@ export const UI = (() => {
       container.appendChild(img);
     });
   }
+
 
   function update(){
     const s = Game.getGameState();
