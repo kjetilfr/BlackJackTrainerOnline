@@ -1,57 +1,43 @@
-<body>!
-  <div id="settings-container">
-    <form id="settings-form">
-      <label>Number of hands (1-4):
-        <input type="number" name="hands" min="1" max="4" value="3" />
-      </label>
-      <label>Late Surrender:
-        <input type="checkbox" name="lateSurrender" />
-      </label>
-      <label>Blackjack Payout:
-        <select name="payout">
-          <option value="2">2:1</option>
-          <option value="1.5" selected>3:2</option>
-          <option value="1.2">6:5</option>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blackjack Game</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="settings-page">
+        <h2>Blackjack Settings</h2>
+        <label for="shoe-size">Select Shoe Size (Decks):</label>
+        <select id="shoe-size">
+            <option value="2">2 Decks</option>
+            <option value="3">3 Decks</option>
+            <option value="4">4 Decks</option>
+            <option value="5">5 Decks</option>
+            <option value="6" selected>6 Decks</option>
+            <option value="7">7 Decks</option>
+            <option value="8">8 Decks</option>
         </select>
-      </label>
-      <label>Insurance:
-        <select name="insurance">
-          <option value="yes">Yes</option>
-          <option value="no" selected>No</option>
-        </select>
-      </label>
-      <label>Dealer 17:
-        <select name="dealer17">
-          <option value="hit">Hit</option>
-          <option value="stand" selected>Stand</option>
-        </select>
-      </label>
-      <label>Double After Split:
-        <select name="doubleAfterSplit">
-          <option value="yes" selected>Yes</option>
-          <option value="no">No</option>
-        </select>
-      </label>
-      <label>Split to hands (2-4):
-        <input type="number" name="splitHands" min="2" max="4" value="2" />
-      </label>
-      <label>Resplitting Aces:
-        <select name="resplitAces">
-          <option value="yes" selected>Yes</option>
-          <option value="no">No</option>
-        </select>
-      </label>
-      <label>Split Aces Draw 1 card only:
-        <select name="splitAcesDrawOne">
-          <option value="yes" selected>Yes</option>
-          <option value="no">No</option>
-        </select>
-      </label>
-      <button type="submit">Start Game</button>
-    </form>
-  </div>
+        <button onclick="startGame()">Start Game</button>
+    </div>
 
-  <div id="game-container" style="display:none;"></div>
+    <div id="game-page" style="display: none;">
+        <h1>Blackjack</h1>
+        <div id="player-hand">
+            <h2>Player's Hand</h2>
+            <div id="player-cards"></div>
+        </div>
+        <div id="dealer-hand">
+            <h2>Dealer's Hand</h2>
+            <div id="dealer-cards"></div>
+        </div>
+        <div id="controls">
+            <button onclick="hit()">Hit</button>
+            <button onclick="stand()">Stand</button>
+        </div>
+    </div>
 
-  <script type="module" src="./settings.js"></script>
+    <script src="game.js"></script>
 </body>
+</html>
