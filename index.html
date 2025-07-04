@@ -3,136 +3,31 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Blackjack Game</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      background: #004400;
-      color: white;
-      text-align: center;
-      padding: 2rem;
-    }
-    button {
-      margin: 1rem;
-      padding: 0.5rem 1rem;
-      font-size: 1rem;
-    }
-    .cards {
-      margin: 1rem 0;
-    }
-  </style>
+  <title>Blackjack with Style 🎴</title>
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <h1>Blackjack</h1>
-  <div>
-    <h2>Your Hand (<span id="player-score">0</span>):</h2>
-    <div id="player-cards" class="cards"></div>
 
-    <h2>Dealer's Hand (<span id="dealer-score">0</span>):</h2>
-    <div id="dealer-cards" class="cards"></div>
+  <div class="hand-section">
+    <div class="hand">
+      <h2>Your Hand (<span id="player-score">0</span>)</h2>
+      <div id="player-cards" class="hand-cards"></div>
+    </div>
+    <div class="hand">
+      <h2>Dealer's Hand (<span id="dealer-score">0</span>)</h2>
+      <div id="dealer-cards" class="hand-cards"></div>
+    </div>
   </div>
 
-  <button onclick="hit()">Hit</button>
-  <button onclick="stand()">Stand</button>
-  <button onclick="restart()">Restart</button>
+  <div class="controls">
+    <button id="hit-btn">Hit</button>
+    <button id="stand-btn">Stand</button>
+    <button id="restart-btn">Restart</button>
+  </div>
 
-  <h2 id="result"></h2>
+  <h2 id="result" class="result-text"></h2>
 
-  <script>
-    const suits = ["♠", "♥", "♦", "♣"];
-    const values = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"];
-
-    let deck = [];
-    let playerHand = [];
-    let dealerHand = [];
-
-    function createDeck() {
-      deck = [];
-      for (let suit of suits) {
-        for (let value of values) {
-          deck.push({ suit, value });
-        }
-      }
-      deck.sort(() => Math.random() - 0.5); // Shuffle
-    }
-
-    function getCardValue(card) {
-      if (["K", "Q", "J"].includes(card.value)) return 10;
-      if (card.value === "A") return 11;
-      return parseInt(card.value);
-    }
-
-    function calculateScore(hand) {
-      let score = 0;
-      let aces = 0;
-      for (let card of hand) {
-        score += getCardValue(card);
-        if (card.value === "A") aces++;
-      }
-      while (score > 21 && aces > 0) {
-        score -= 10;
-        aces--;
-      }
-      return score;
-    }
-
-    function drawCard(hand) {
-      const card = deck.pop();
-      hand.push(card);
-    }
-
-    function displayHands() {
-      document.getElementById("player-cards").innerHTML = playerHand.map(c => `${c.value}${c.suit}`).join(" ");
-      document.getElementById("dealer-cards").innerHTML = dealerHand.map(c => `${c.value}${c.suit}`).join(" ");
-      document.getElementById("player-score").textContent = calculateScore(playerHand);
-      document.getElementById("dealer-score").textContent = calculateScore(dealerHand);
-    }
-
-    function hit() {
-      drawCard(playerHand);
-      displayHands();
-      const score = calculateScore(playerHand);
-      if (score > 21) {
-        endGame("You bust! Dealer wins.");
-      }
-    }
-
-    function stand() {
-      while (calculateScore(dealerHand) < 17) {
-        drawCard(dealerHand);
-      }
-      const playerScore = calculateScore(playerHand);
-      const dealerScore = calculateScore(dealerHand);
-
-      if (dealerScore > 21 || playerScore > dealerScore) {
-        endGame("You win!");
-      } else if (playerScore === dealerScore) {
-        endGame("It's a tie!");
-      } else {
-        endGame("Dealer wins!");
-      }
-    }
-
-    function endGame(message) {
-      document.getElementById("result").textContent = message;
-      document.querySelectorAll("button").forEach(btn => btn.disabled = true);
-    }
-
-    function restart() {
-      createDeck();
-      playerHand = [];
-      dealerHand = [];
-      drawCard(playerHand);
-      drawCard(playerHand);
-      drawCard(dealerHand);
-      drawCard(dealerHand);
-      displayHands();
-      document.getElementById("result").textContent = "";
-      document.querySelectorAll("button").forEach(btn => btn.disabled = false);
-    }
-
-    // Start game on load
-    restart();
-  </script>
+  <script src="script.js"></script>
 </body>
 </html>
