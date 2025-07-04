@@ -75,32 +75,34 @@ export const UI = (() => {
   }
 
 
-  function update(){
+  function update() {
     const s = Game.getGameState();
-    dealerScoreEl.textContent = handScore(s.dealerHand.filter(c => c.faceUp !== false)); // Ignore face-down cards for dealer
-
+    dealerScoreEl.textContent = handScore(s.dealerHand);
+  
+    // For dealer, only hide the first card during the player's turn
     const hideDealerFirstCard = s.playerHands.some(hand => hand.state === 'playing');
     renderHandCards(s.dealerHand, dealerCardsEl, hideDealerFirstCard); // Pass `hideDealerFirstCard` flag
-
+  
     playerSectionEl.innerHTML = '';
     s.playerHands.forEach((h, idx) => {
       const div = document.createElement('div');
       div.classList.add('player-hand');
       if (idx === s.currentHandIndex && h.state === 'playing') div.style.border = '2px solid gold';
-
+  
       const score = handScore(h.cards);
-      div.innerHTML = `<h3>Hand ${idx+1} — ${score} ${h.outcome ? '('+h.outcome+')' : ''}</h3><div class="hand-cards"></div>`;
+      div.innerHTML = `<h3>Hand ${idx + 1} — ${score} ${h.outcome ? '(' + h.outcome + ')' : ''}</h3><div class="hand-cards"></div>`;
       renderHandCards(h.cards, div.querySelector('.hand-cards'));
       playerSectionEl.appendChild(div);
     });
-
+  
     const cur = s.playerHands[s.currentHandIndex];
-    buttons.hit.disabled = !cur || cur.state !== 'playing' || cur.state === 'busted' || cur.state === 'surrendered';
-    buttons.stand.disabled = !cur || cur.state !== 'playing' || cur.state === 'busted' || cur.state === 'surrendered';
-    buttons.double.disabled = !cur || cur.state !== 'playing' || cur.cards.length !== 2 || cur.state === 'busted' || cur.state === 'surrendered';
-    buttons.split.disabled = !cur || cur.state !== 'playing' || !Game.canSplit?.(cur) || cur.state === 'busted' || cur.state === 'surrendered';
-    buttons.surrender.disabled = !cur || cur.state !== 'playing' || cur.state === 'busted' || cur.state === 'surrendered' || !s.settings.lateSurrender;
+    buttons.hit.disabled = !cur || cur.state !== 'playing';
+    buttons.stand.disabled = !cur || cur.state !== 'playing';
+    buttons.double.disabled = !cur || cur.state !== 'playing' || cur.cards.length !== 2;
+    buttons.split.disabled = !cur || cur.state !== 'playing' || !Game.canSplit?.(cur);
+    buttons.surrender.disabled = !cur || cur.state !== 'playing' || !s.settings.lateSurrender;
   }
+
 
   function handScore(hand){
     let score = hand.reduce((a,c)=>a+cardValue(c),0);
