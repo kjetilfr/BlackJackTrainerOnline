@@ -60,13 +60,21 @@ function displayHands() {
 
     // Display player cards
     playerHand.forEach(card => {
-        playerCardsContainer.innerHTML += `<img src="cards/card_${card.suit}_${card.value}.png" alt="${card.value} of ${card.suit}" />`;
+        playerCardsContainer.innerHTML += `<img src="cards/card_${card.suit}_${formatCardValue(card.value)}.png" alt="${card.value} of ${card.suit}" />`;
     });
 
     // Display dealer cards
     dealerHand.forEach(card => {
-        dealerCardsContainer.innerHTML += `<img src="cards/card_${card.suit}_${card.value}.png" alt="${card.value} of ${card.suit}" />`;
+        dealerCardsContainer.innerHTML += `<img src="cards/card_${card.suit}_${formatCardValue(card.value)}.png" alt="${card.value} of ${card.suit}" />`;
     });
+}
+
+// Format the card value (prepend '0' for values 2-9, except for 10)
+function formatCardValue(value) {
+    if (value === '10') {
+        return value; // No leading zero needed for 10
+    }
+    return value.padStart(2, '0'); // Add leading zero for 2-9
 }
 
 // Player hits (draws a card)
