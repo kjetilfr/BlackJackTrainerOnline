@@ -1,218 +1,84 @@
-// game.js
-export const Game = (() => {
-  const suits = ["S", "H", "D", "C"];
-  const values = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"];
+// Array for card values and suits
+const suits = ['hearts', 'diamonds', 'clubs', 'spades'];
+const values = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
 
-  let deck = [];
-  let settings = null;
+let shoe = [];
+let playerHand = [];
+let dealerHand = [];
+let deckCount = 6; // Default shoe size (6 decks)
 
-  let dealerHand = [];
-  let playerHands = []; // array of { cards: [], state: '', bet: number, doubled: bool, surrendered: bool }
-  let currentHandIndex = 0;
+// Initialize the game by setting up the shoe
+function startGame() {
+    const shoeSize = document.getElementById('shoe-size').value;
+    deckCount = parseInt(shoeSize);
+    createShoe(deckCount);
+    document.getElementById('settings-page').style.display = 'none';
+    document.getElementById('game-page').style.display = 'block';
+    dealCards();
+}
 
-  // Helpers
-
-  function createDeck() {
-    deck = [];
-    suits.forEach(suit => {
-      values.forEach(value => {
-        deck.push({ value, suit });
-      });
-    });
-    deck.sort(() => Math.random() - 0.5); // Shuffle the deck
-  }
-
-  function drawCard() {
-    if (deck.length === 0) createDeck(); // Recreate deck if empty
-    return deck.pop();
-  }
-
-  function cardValue(card) {
-    if (["J", "Q", "K"].includes(card.value)) return 10;
-    if (card.value === "A") return 11;
-    return parseInt(card.value);
-  }
-
-  function handScore(hand) {
-    let score = 0;
-    let aces = 0;
-
-    // Sum up values of the cards, but ignore face-down cards
-    hand.forEach(card => {
-      if (card.faceUp === undefined || card.faceUp === true) {
-        score += cardValue(card);
-        if (card.value === "A") {
-          aces++;
+// Create the shoe with the specified number of decks
+function createShoe(numDecks) {
+    shoe = [];
+    for (let i = 0; i < numDecks; i++) {
+        for (let suit of suits) {
+            for (let value of values) {
+                shoe.push({ suit: suit, value: value });
+            }
         }
-      }
-    });
-
-    // Adjust for aces
-    while (score > 21 && aces > 0) {
-      score -= 10;
-      aces--;
     }
+    shuffleShoe();
+}
 
-    return score;
-  }
+// Shuffle the shoe
+function shuffleShoe() {
+    for (let i = shoe.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shoe[i], shoe[j]] = [shoe[j], shoe[i]];
+    }
+}
 
-  // Initialize game
-  function start(userSettings) {
-    settings = userSettings;
-    createDeck();
-  
+// Deal initial cards
+function dealCards() {
+    playerHand = [drawCard(), drawCard()];
     dealerHand = [drawCard(), drawCard()];
-    dealerHand[1].faceUp = false; // Ensure the second card is face down at the start
-    
-    playerHands = [];
-  
-    for (let i = 0; i < settings.numberOfHands; i++) {
-      playerHands.push({
-        cards: [drawCard(), drawCard()],
-        state: "playing",
-        bet: 1,
-        doubled: false,
-        surrendered: false,
-        splitsDone: 0,
-      });
-    }
-  
-    currentHandIndex = 0;
-  }
+    displayHands();
+}
 
-  // Game actions: hit, stand, double, split, surrender etc.
-  function canSplit(hand) {
-    if (hand.cards.length !== 2) return false;
-    const c1 = hand.cards[0];
-    const c2 = hand.cards[1];
-    if (c1.value !== c2.value) return false;
-    if (playerHands.length >= settings.maxSplitHands) return false;
-    return true;
-  }
+// Draw a card from the shoe
+function drawCard() {
+    return shoe.pop();
+}
 
-  function hitCurrentHand() {
-    if (currentHandIndex >= playerHands.length) return;
-    const hand = playerHands[currentHandIndex];
-    if (hand.state !== "playing") return;
+// Display the player's and dealer's hands
+function displayHands() {
+    const playerCardsContainer = document.getElementById('player-cards');
+    const dealerCardsContainer = document.getElementById('dealer-cards');
 
-    hand.cards.push(drawCard());
-    const score = handScore(hand.cards);
-    if (score > 21) hand.state = "busted";
-  }
+    playerCardsContainer.innerHTML = '';
+    dealerCardsContainer.innerHTML = '';
 
-  function standCurrentHand() {
-    if (currentHandIndex >= playerHands.length) return;
-    playerHands[currentHandIndex].state = "stood";
-  }
+    // Display player cards
+    playerHand.forEach(card => {
+        playerCardsContainer.innerHTML += `<img src="cards/card_${card.suit}_${card.value}.png" alt="${card.value} of ${card.suit}" />`;
+    });
 
-  function doubleCurrentHand() {
-    if (currentHandIndex >= playerHands.length) return;
-    const hand = playerHands[currentHandIndex];
-    if (hand.state !== "playing" || hand.cards.length !== 2) return;
-    hand.bet *= 2;
-    hand.doubled = true;
-    hand.cards.push(drawCard());
-    const score = handScore(hand.cards);
-    if (score > 21) hand.state = "busted";
-    else hand.state = "stood";
-  }
+    // Display dealer cards
+    dealerHand.forEach(card => {
+        dealerCardsContainer.innerHTML += `<img src="cards/card_${card.suit}_${card.value}.png" alt="${card.value} of ${card.suit}" />`;
+    });
+}
 
-  function surrenderCurrentHand() {
-    if (currentHandIndex >= playerHands.length) return;
-    const hand = playerHands[currentHandIndex];
-    if (hand.state !== "playing") return;
-    if (settings.lateSurrender) {
-      // Late surrender allowed only first turn before any other action
-      if (hand.cards.length === 2) {
-        hand.surrendered = true;
-        hand.state = "surrendered";
-      }
-    }
-  }
+// Player hits (draws a card)
+function hit() {
+    playerHand.push(drawCard());
+    displayHands();
+}
 
-  function splitCurrentHand() {
-    if (currentHandIndex >= playerHands.length) return;
-    const hand = playerHands[currentHandIndex];
-    if (!canSplit(hand)) return;
+// Player stands (ends their turn)
+function stand() {
+    // Implement dealer logic here (dealer will draw until reaching 17 or more)
+    alert('Player stands!');
+    // TODO: Implement game over logic and winner determination
+}
 
-    const cardToSplit = hand.cards.pop();
-    const newHand = {
-      cards: [cardToSplit, drawCard()],
-      state: "playing",
-      bet: hand.bet,
-      doubled: false,
-      surrendered: false,
-      splitsDone: hand.splitsDone + 1,
-    };
-
-    if (settings.splitAcesDrawOneCardOnly && hand.cards[0].value === "A") {
-      // After splitting aces, only one card drawn
-      hand.state = "stood";
-      newHand.state = "stood";
-    }
-
-    playerHands.splice(currentHandIndex + 1, 0, newHand);
-
-    // Add one card to original split hand as well
-    hand.cards.push(drawCard());
-  }
-
-  // Dealer plays according to dealerHitsSoft17 setting
-  function dealerPlay() {
-    while (true) {
-      const score = handScore(dealerHand);
-      const hasAce = dealerHand.some(c => c.value === "A");
-
-      if (score > 21) break;
-      if (score >= 17) {
-        if (score === 17 && hasAce && settings.dealerHitsSoft17) {
-          // If it's a soft 17 (Ace + 6), hit if dealerHitsSoft17 is true
-          dealerHand.push(drawCard());
-        } else {
-          break;
-        }
-      } else {
-        dealerHand.push(drawCard());
-      }
-    }
-
-    // Reveal the dealer's second card after the player's turn
-    revealDealerCards();
-    updateDealerHandScore(); // Update dealer score after revealing the second card
-  }
-
-  // Revealing both dealer cards after player finished their turn
-  function revealDealerCards() {
-    dealerHand[1].faceUp = true; // Reveal second card
-  }
-
-  function nextHand() {
-    do {
-      currentHandIndex++;
-    } while (currentHandIndex < playerHands.length && (playerHands[currentHandIndex].state === "busted" || playerHands[currentHandIndex].state === "stood"));
-
-    if (currentHandIndex >= playerHands.length) {
-      dealerPlay();
-    }
-  }
-
-  function getGameState() {
-    return {
-      dealerHand,
-      playerHands,
-      currentHandIndex,
-      settings,
-    };
-  }
-
-  return {
-    start,
-    hitCurrentHand,
-    standCurrentHand,
-    doubleCurrentHand,
-    surrenderCurrentHand,
-    splitCurrentHand,
-    nextHand,
-    getGameState,
-  };
-})();
