@@ -42,7 +42,7 @@ export const UI = (() => {
   }
 
   // Render function for hand cards with corrected image paths
-  function renderHandCards(hand, container, hideSecondCard = false){
+  function renderHandCards(hand, container, hideDealerFirstCard = false){
     container.innerHTML = '';
     hand.forEach((c, index) => {
       const img = document.createElement('img');
@@ -55,12 +55,12 @@ export const UI = (() => {
                       ? c.value
                       : c.value.padStart(2, '0'); // pad numbers (2-10) with leading 0 if needed
 
-      // If this is the dealer's second card and we are hiding it, show a back of the card
-      if (hideSecondCard && index === 1) {
-        img.src = 'cards/card_back.png'; // This assumes you have a "card_back.png" image
+      // If it's the dealer's first card and we are hiding it, show a back of the card
+      if (hideDealerFirstCard && index === 0) {
+        img.src = 'cards/card_back.png'; // This assumes you have a "card_back.png" image for the face down card
         img.classList.add('card');
         container.appendChild(img);
-        return; // Only append the back of the card for the second card
+        return; // Only append the back of the card for the first card
       }
 
       img.src = `cards/card_${suit}_${cardValue}.png`;  // Use the correct card image path
@@ -72,10 +72,10 @@ export const UI = (() => {
   function update(){
     const s = Game.getGameState();
     dealerScoreEl.textContent = handScore(s.dealerHand);
-    
-    // For dealer, only hide the second card during player's turn
-    const hideSecondCard = s.playerHands.some(hand => hand.state === 'playing');
-    renderHandCards(s.dealerHand, dealerCardsEl, hideSecondCard); // Pass `hideSecondCard` flag
+
+    // For dealer, only hide the first card during the player's turn
+    const hideDealerFirstCard = s.playerHands.some(hand => hand.state === 'playing');
+    renderHandCards(s.dealerHand, dealerCardsEl, hideDealerFirstCard); // Pass `hideDealerFirstCard` flag
 
     playerSectionEl.innerHTML = '';
     s.playerHands.forEach((h, idx) => {
