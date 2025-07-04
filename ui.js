@@ -49,25 +49,24 @@ export const UI = (() => {
       const suit = c.suit === 'S' ? 'spades' :
                    c.suit === 'H' ? 'hearts' :
                    c.suit === 'D' ? 'diamonds' : 'clubs';
-
-      // Corrected card value formatting: 
+  
       let cardValue = c.value === 'A' || c.value === 'J' || c.value === 'Q' || c.value === 'K'
                       ? c.value
                       : c.value.padStart(2, '0'); // pad numbers (2-10) with leading 0 if needed
-
+  
       // If it's the dealer's first card and we are hiding it, show a back of the card
       if (hideDealerFirstCard && index === 0) {
-        img.src = 'cards/card_back.png'; // This assumes you have a "card_back.png" image for the face down card
+        img.src = 'cards/card_back.png'; // Face down card
         img.classList.add('card');
         container.appendChild(img);
-        return; // Only append the back of the card for the first card
+        return;
+      }
+  
+      // If the card is the dealer's second card and it has been marked faceUp, show it
+      if (index === 1 && !c.faceUp) {
+        img.src = 'cards/card_back.png'; // Face down card for second card
       }
 
-      img.src = `cards/card_${suit}_${cardValue}.png`;  // Use the correct card image path
-      img.classList.add('card');
-      container.appendChild(img);
-    });
-  }
 
   function update(){
     const s = Game.getGameState();
