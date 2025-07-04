@@ -1,6 +1,6 @@
-// Game setup
-const suits = ["S","H","D","C"];
+const suits = ["S", "H", "D", "C"];
 const values = ["A","2","3","4","5","6","7","8","9","10","J","Q","K"];
+
 let deck = [], playerHand = [], dealerHand = [];
 
 const playerEl = document.getElementById('player-cards');
@@ -8,109 +8,144 @@ const dealerEl = document.getElementById('dealer-cards');
 const playerScoreEl = document.getElementById('player-score');
 const dealerScoreEl = document.getElementById('dealer-score');
 const resultEl = document.getElementById('result');
+
 const hitBtn = document.getElementById('hit-btn');
 const standBtn = document.getElementById('stand-btn');
 const restartBtn = document.getElementById('restart-btn');
 
-function createDeck() {
+function createDeck(){
   deck = [];
-  for (let s of suits) values.forEach(v => deck.push({value: v, suit: s}));
+  suits.forEach(suit => {
+    values.forEach(value => {
+      deck.push({value, suit});
+    });
+  });
   deck.sort(() => Math.random() - 0.5);
 }
 
-function drawCard(hand) {
+function drawCard(hand){
   hand.push(deck.pop());
 }
 
-function getValue(card) {
-  if (["J","Q","K"].includes(card.value)) return 10;
-  if (card.value === "A") return 11;
+function getCardValue(card){
+  if(["J","Q","K"].includes(card.value)) return 10;
+  if(card.value === "A") return 11;
   return parseInt(card.value);
 }
 
-function calcScore(hand) {
-  let score = hand.reduce((sum, c) => sum + getValue(c), 0);
-  let aces = hand.filter(c => c.value === "A").length;
-  while (score > 21 && aces) { score -= 10; aces--; }
+function calculateScore(hand){
+  let score = hand.reduce((acc, card) => acc + getCardValue(card), 0);
+  let aces = hand.filter(card => card.value === "A").length;
+  while(score > 21 && aces > 0){
+    score -= 10;
+    aces--;
+  }
   return score;
 }
 
-function createCardEl(card, faceDown = false, delay = 0) {
-  const div = document.createElement('div');
-  div.className = 'card';
-  if (faceDown) div.classList.add('flip');
-  div.style.animationDelay = `${delay}ms`;
+function getKenneyCardFileName(card) {
+  const suitMap = {
+    "S": "spades",
+    "H": "hearts",
+    "D": "diamonds",
+    "C": "clubs"
+  };
 
-  const front = document.createElement('img');
-  front.src = `cards/${card.value}${card.suit}.png`;
+  const valueMap = {
+    "A": "A",
+    "J": "J",
+    "Q": "Q",
+    "K": "K"
+  };
 
-  const back = document.createElement('div');
-  back.className = 'back';
+  let val = card.value;
+  if (!valueMap[val]) {
+    val = val.padStart(2, "0"); // e.g. "2" -> "02"
+  } else {
+    val = valueMap[val];
+  }
 
-  div.append(front, back);
-  return div;
+  const suit = suitMap[card.suit];
+  return `cards/card_${suit}_${val}.png`;
 }
 
-function updateDisplay() {
-  playerEl.innerHTML = '';
-  dealerEl.innerHTML = '';
-
-  playerHand.forEach((c, i) => playerEl.append(createCardEl(c, false, i * 200)));
-  dealerHand.forEach((c, i) => {
-    const faceDown = (i === 1); // second card face down
-    dealerEl.append(createCardEl(c, faceDown, i * 200));
-  });
-
-  playerScoreEl.textContent = calcScore(playerHand);
-  dealerScoreEl.textContent = calcScore(dealerHand);
-}
-
-function checkBust() {
-  if (calcScore(playerHand) > 21) endGame("You busted! Dealer wins.");
-}
-
-function hit() {
-  drawCard(playerHand);
-  updateDisplay();
-  checkBust();
-}
-
-function stand() {
-  // Reveal dealer's card
-  const faceDownCard = dealerEl.querySelector('.card.flip');
-  if (faceDownCard) faceDownCard.classList.remove('flip');
-
-  // Dealer hits until 17+
-  setTimeout(() => {
-    while (calcScore(dealerHand) < 17) {
-      drawCard(dealerHand);
-      updateDisplay();
+function renderHand(hand, container, hideSecondCard = false){
+  container.innerHTML = "";
+  hand.forEach((card, i) => {
+    const img = document.createElement('img');
+    if(i === 1 && hideSecondCard){
+      img.src = 'cards/card_back.png'; // Kenney card back image
+    } else {
+      img.src = getKenneyCardFileName(card);
     }
-    const p = calcScore(playerHand), d = calcScore(dealerHand);
-    if (d > 21 || p > d) endGame("You win!");
-    else if (p === d) endGame("It's a tie!");
-    else endGame("Dealer wins!");
-  }, 500);
+    img.classList.add('card');
+    container.appendChild(img);
+  });
 }
 
-function endGame(msg) {
-  resultEl.textContent = msg;
-  hitBtn.disabled = standBtn.disabled = true;
+function updateGame(hideDealerSecondCard = true){
+  renderHand(playerHand, playerEl, false);
+  renderHand(dealerHand, dealerEl, hideDealerSecondCard);
+  playerScoreEl.textContent = calculateScore(playerHand);
+  dealerScoreEl.textContent = hideDealerSecondCard ? "?" : calculateScore(dealerHand);
 }
 
-function restart() {
+function checkEndGame(){
+  const playerScore = calculateScore(playerHand);
+  if(playerScore > 21){
+    endGame("You busted! Dealer wins.");
+  }
+}
+
+function endGame(message){
+  resultEl.textContent = message;
+  hitBtn.disabled = true;
+  standBtn.disabled = true;
+}
+
+function dealerPlay(){
+  hitBtn.disabled = true;
+  standBtn.disabled = true;
+  updateGame(false);
+  let dealerScore = calculateScore(dealerHand);
+  while(dealerScore < 17){
+    drawCard(dealerHand);
+    dealerScore = calculateScore(dealerHand);
+    updateGame(false);
+  }
+  const playerScore = calculateScore(playerHand);
+  if(dealerScore > 21 || playerScore > dealerScore){
+    endGame("You win!");
+  } else if(playerScore === dealerScore){
+    endGame("It's a tie!");
+  } else {
+    endGame("Dealer wins!");
+  }
+}
+
+hitBtn.onclick = () => {
+  drawCard(playerHand);
+  updateGame();
+  checkEndGame();
+};
+
+standBtn.onclick = () => {
+  dealerPlay();
+};
+
+restartBtn.onclick = () => {
   createDeck();
-  playerHand = []; dealerHand = [];
-  drawCard(playerHand); drawCard(dealerHand);
-  drawCard(playerHand); drawCard(dealerHand);
-  hitBtn.disabled = standBtn.disabled = false;
-  resultEl.textContent = '';
-  updateDisplay();
-}
+  playerHand = [];
+  dealerHand = [];
+  drawCard(playerHand);
+  drawCard(dealerHand);
+  drawCard(playerHand);
+  drawCard(dealerHand);
+  resultEl.textContent = "";
+  hitBtn.disabled = false;
+  standBtn.disabled = false;
+  updateGame();
+};
 
-hitBtn.addEventListener('click', hit);
-standBtn.addEventListener('click', stand);
-restartBtn.addEventListener('click', restart);
-
-// Initialize
-restart();
+// Start game on page load
+restartBtn.onclick();
