@@ -54,6 +54,8 @@ function drawCard() {
 function displayHands() {
     const playerCardsContainer = document.getElementById('player-cards');
     const dealerCardsContainer = document.getElementById('dealer-cards');
+    const playerTotalContainer = document.getElementById('player-total');
+    const dealerTotalContainer = document.getElementById('dealer-total');
 
     playerCardsContainer.innerHTML = '';
     dealerCardsContainer.innerHTML = '';
@@ -63,10 +65,13 @@ function displayHands() {
         playerCardsContainer.innerHTML += `<img src="cards/card_${card.suit}_${formatCardValue(card.value)}.png" alt="${card.value} of ${card.suit}" />`;
     });
 
-    // Display dealer cards
-    dealerHand.forEach(card => {
-        dealerCardsContainer.innerHTML += `<img src="cards/card_${card.suit}_${formatCardValue(card.value)}.png" alt="${card.value} of ${card.suit}" />`;
-    });
+    // Display dealer's cards (hide the first card)
+    dealerCardsContainer.innerHTML += `<img src="cards/card_back.png" alt="Dealer's hidden card" />`; // Hide first card
+    dealerCardsContainer.innerHTML += `<img src="cards/card_${dealerHand[1].suit}_${formatCardValue(dealerHand[1].value)}.png" alt="${dealerHand[1].value} of ${dealerHand[1].suit}" />`; // Show second card
+
+    // Display totals
+    playerTotalContainer.textContent = `Total: ${calculateTotal(playerHand)}`;
+    dealerTotalContainer.textContent = `Total: ${calculateTotal(dealerHand)}`;
 }
 
 // Format the card value (prepend '0' for values 2-9, except for 10)
@@ -77,6 +82,31 @@ function formatCardValue(value) {
     return value.padStart(2, '0'); // Add leading zero for 2-9
 }
 
+// Calculate the total value of a hand
+function calculateTotal(hand) {
+    let total = 0;
+    let aceCount = 0;
+
+    hand.forEach(card => {
+        if (['J', 'Q', 'K'].includes(card.value)) {
+            total += 10;
+        } else if (card.value === 'A') {
+            aceCount += 1;
+            total += 11; // Initially treat Ace as 11
+        } else {
+            total += parseInt(card.value); // Add the card's value
+        }
+    });
+
+    // Adjust for Aces: If the total is over 21 and we have Aces, treat them as 1
+    while (total > 21 && aceCount > 0) {
+        total -= 10; // Adjust Ace from 11 to 1
+        aceCount -= 1;
+    }
+
+    return total;
+}
+
 // Player hits (draws a card)
 function hit() {
     playerHand.push(drawCard());
@@ -85,8 +115,47 @@ function hit() {
 
 // Player stands (ends their turn)
 function stand() {
-    // Implement dealer logic here (dealer will draw until reaching 17 or more)
-    alert('Player stands!');
-    // TODO: Implement game over logic and winner determination
+    // Reveal dealer's first card
+    const dealerCardsContainer = document.getElementById('dealer-cards');
+    dealerCardsContainer.innerHTML = '';
+    dealerCardsContainer.innerHTML += `<img src="cards/card_${dealerHand[0].suit}_${formatCardValue(dealerHand[0].value)}.png" alt="${dealerHand[0].value} of ${dealerHand[0].suit}" />`; // Show first card
+    dealerCardsContainer.innerHTML += `<img src="cards/card_${dealerHand[1].suit}_${formatCardValue(dealerHand[1].value)}.png" alt="${dealerHand[1].value} of ${dealerHand[1].suit}" />`; // Show second card
+
+    // Dealer's turn logic
+    dealerTurn();
 }
 
+// Dealer's turn: Dealer hits until total is 17 or higher
+function dealerTurn() {
+    let dealerTotal = calculateTotal(dealerHand);
+    while (dealerTotal < 17) {
+        dealerHand.push(drawCard());
+        dealerTotal = calculateTotal(dealerHand);
+        displayHands(); // Update display with each new card drawn
+    }
+
+    // After dealer stands, check who wins
+    determineWinner();
+}
+
+// Determine the winner based on hand totals
+function determineWinner() {
+    const playerTotal = calculateTotal(playerHand);
+    const dealerTotal = calculateTotal(dealerHand);
+
+    let resultMessage = '';
+
+    if (playerTotal > 21) {
+        resultMessage = 'Player busts! Dealer wins.';
+    } else if (dealerTotal > 21) {
+        resultMessage = 'Dealer busts! Player wins.';
+    } else if (playerTotal > dealerTotal) {
+        resultMessage = 'Player wins!';
+    } else if (dealerTotal > playerTotal) {
+        resultMessage = 'Dealer wins!';
+    } else {
+        resultMessage = 'It\'s a tie!';
+    }
+
+    alert(resultMessage);
+}
