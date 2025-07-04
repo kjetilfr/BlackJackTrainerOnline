@@ -60,10 +60,12 @@ export const Game = (() => {
   function start(userSettings) {
     settings = userSettings;
     createDeck();
-
+  
     dealerHand = [drawCard(), drawCard()];
+    dealerHand[1].faceUp = false; // Ensure the second card is face down at the start
+    
     playerHands = [];
-
+  
     for (let i = 0; i < settings.numberOfHands; i++) {
       playerHands.push({
         cards: [drawCard(), drawCard()],
@@ -74,7 +76,7 @@ export const Game = (() => {
         splitsDone: 0,
       });
     }
-
+  
     currentHandIndex = 0;
   }
 
