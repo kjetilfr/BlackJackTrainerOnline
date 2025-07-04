@@ -1,5 +1,11 @@
 // ui.js
 import { Game } from './game.js';
+import { currentSettings } from './settings.js';
+
+export const UI = (() => {
+  let container;
+  let dealer
+
 
 export const UI = (() => {
   let container;
