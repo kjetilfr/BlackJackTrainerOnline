@@ -109,61 +109,94 @@ function displayHands() {
     playerCardsContainer.innerHTML = '';
     dealerCardsContainer.innerHTML = '';
     resultMessageContainer.innerHTML = '';
+    dealerTotalContainer.textContent = '';
 
-    // Display the player's hands
-    playerHands.forEach((hand, index) => {
-        let handHTML = `<div style="margin-bottom: 16px;">`;
+    let delay = 0;
+    const dealDelay = 200; // milliseconds between each card
 
-        // Display cards in the player's hand
-        hand.forEach(card => {
-            handHTML += `<img src="cards/card_${card.suit}_${formatCardValue(card.value)}.png" 
-                         alt="${card.value} of ${card.suit}" style="margin-right: 4px;" />`;
+    // Step 1: Deal player cards one-by-one
+    playerHands.forEach((hand, handIndex) => {
+        const isActive = handIndex === currentHandIndex;
+        const handWrapper = document.createElement('div');
+        handWrapper.className = `player-hand-container ${isActive ? 'active' : ''}`;
+        handWrapper.id = `player-hand-${handIndex}`;
+        playerCardsContainer.appendChild(handWrapper);
+
+        hand.forEach((card, cardIndex) => {
+            setTimeout(() => {
+                const img = document.createElement('img');
+                img.className = 'card-image';
+                img.src = `cards/card_${card.suit}_${formatCardValue(card.value)}.png`;
+                img.alt = `${card.value} of ${card.suit}`;
+                img.style.marginRight = '4px';
+                handWrapper.appendChild(img);
+            }, delay);
+            delay += dealDelay;
         });
 
-        const total = calculateTotal(hand);
+        // Show total & buttons after cards
+        setTimeout(() => {
+            const total = calculateTotal(hand);
+            const totalDiv = document.createElement('div');
+            totalDiv.style.marginTop = '8px';
+            totalDiv.textContent = `Total: ${total}`;
+            handWrapper.appendChild(totalDiv);
 
-        // Display the total for the hand below the cards
-        handHTML += `<div style="margin-top: 8px;">Total: ${total}</div>`;
+            if (isActive) {
+                const canDouble = hand.length === 2;
+                const canSplit = hand.length === 2 && hand[0].value === hand[1].value;
 
-	if (
-		hand.length === 2 &&
-		hand[0].value === hand[1].value &&
-		index === currentHandIndex
-	) {
-		document.getElementById('split-btn-container').style.display = 'block';
-	} else {
-		document.getElementById('split-btn-container').style.display = 'none';
-	}
+                const buttonDiv = document.createElement('div');
+                buttonDiv.style.marginTop = '8px';
+                buttonDiv.innerHTML = `
+                    <button onclick="hit(${handIndex})">Hit</button>
+                    <button onclick="stand()">Stand</button>
+                    <button onclick="doubleDown(${handIndex})" 
+                        ${canDouble ? '' : 'disabled title="You can only double on your first move"'}>Double</button>
+                    <button onclick="split()" 
+                        ${canSplit ? '' : 'disabled title="You can only split equal pairs (e.g., two 8s)"'}>Split</button>
+                `;
+                handWrapper.appendChild(buttonDiv);
+            }
 
-        // Display buttons for the current hand only if the hand is not busted and it's the active hand
-        if (total <= 21 && index === currentHandIndex) {
-		handHTML += `
-			<div style="margin-top: 8px;">
-			<button onclick="hit(${index})">Hit</button>
-			<button onclick="stand()">Stand</button>
-			${splitHand && !allowDAS ? '' : `<button onclick="doubleDown(${index})">Double</button>`}
-	        	</div>
-	    	`;
-	} else if (total > 21) {
-            // If the hand is busted, disable further action for this hand
-            handHTML += `<div style="margin-top: 8px; color: red;">Busted!</div>`;
-        }
+            if (calculateTotal(hand) > 21) {
+                const busted = document.createElement('div');
+                busted.style.color = 'red';
+                busted.style.marginTop = '8px';
+                busted.textContent = 'Busted!';
+                handWrapper.appendChild(busted);
+            }
 
-        handHTML += `</div>`;  // Close the hand block
-
-        playerCardsContainer.innerHTML += handHTML;
+        }, delay);
+        delay += 150; // slight buffer
     });
 
-    // Display the dealer's hand (only showing the second card initially)
-    dealerCardsContainer.innerHTML = `
-        <img src="cards/card_back.png" alt="Dealer's hidden card" style="margin-right: 4px;" />
-        <img src="cards/card_${dealerHand[1].suit}_${formatCardValue(dealerHand[1].value)}.png" 
-             alt="${dealerHand[1].value} of ${dealerHand[1].suit}" />
-    `;
+    // Step 2: Deal dealer cards
+    setTimeout(() => {
+        dealerCardsContainer.innerHTML = `
+            <div class="card">
+                <div class="card-inner" id="dealer-card-0">
+                    <div class="card-back"></div>
+                    <div class="card-front">
+                        <img class="card-image" src="cards/card_${dealerHand[0].suit}_${formatCardValue(dealerHand[0].value)}.png"
+                             alt="${dealerHand[0].value} of ${dealerHand[0].suit}" />
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <img class="card-image" src="cards/card_${dealerHand[1].suit}_${formatCardValue(dealerHand[1].value)}.png"
+                     alt="${dealerHand[1].value} of ${dealerHand[1].suit}" />
+            </div>
+        `;
+        dealerTotalContainer.textContent = `Total: ${calculateTotal([dealerHand[1]])}`;
+    }, delay);
 
-    // Initially show only the total for the dealer's visible card
-    dealerTotalContainer.textContent = `Total: ${calculateTotal([dealerHand[1]])}`;
+    displayCounters();
 }
+
+
+
+
 
 function split() {
     const hand = playerHands[currentHandIndex];
