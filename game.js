@@ -11,9 +11,13 @@ let currentHandIndex = 0;
 let discardPile = [];
 let discardPileCounter = 0;
 let shoeCounter = 0;
+let allowDAS = true;
 
 function startGame() {
     const shoeSize = document.getElementById('shoe-size').value;
+    const dasCheckbox = document.getElementById('das-setting').checked;
+
+    allowDAS = dasCheckbox;
     deckCount = parseInt(shoeSize);
     createShoe(deckCount);
     document.getElementById('settings-page').style.display = 'none';
@@ -72,6 +76,29 @@ function drawCard() {
     return card;
 }
 
+function doubleDown(handIndex) {
+    if (!playerHands[handIndex] || handIndex !== currentHandIndex) return;
+
+    // Add one card
+    const card = drawCard();
+    playerHands[handIndex].push(card);
+
+    // Display updated hand with rotated card
+    const playerCardsContainer = document.getElementById('player-cards');
+    const lastHandDiv = playerCardsContainer.children[handIndex];
+    const rotatedCard = document.createElement('img');
+    rotatedCard.src = `cards/card_${card.suit}_${formatCardValue(card.value)}.png`;
+    rotatedCard.alt = `${card.value} of ${card.suit}`;
+    rotatedCard.style.transform = 'rotate(90deg)';
+    rotatedCard.style.marginLeft = '4px';
+    rotatedCard.style.height = '80px';
+    rotatedCard.style.marginTop = '4px';
+
+    lastHandDiv.querySelector('div').appendChild(rotatedCard);
+
+    stand();  // Immediately move to next hand
+}
+
 
 function displayHands() {
     const playerCardsContainer = document.getElementById('player-cards');
@@ -98,15 +125,26 @@ function displayHands() {
         // Display the total for the hand below the cards
         handHTML += `<div style="margin-top: 8px;">Total: ${total}</div>`;
 
+	if (
+		hand.length === 2 &&
+		hand[0].value === hand[1].value &&
+		index === currentHandIndex
+	) {
+		document.getElementById('split-btn-container').style.display = 'block';
+	} else {
+		document.getElementById('split-btn-container').style.display = 'none';
+	}
+
         // Display buttons for the current hand only if the hand is not busted and it's the active hand
         if (total <= 21 && index === currentHandIndex) {
-            handHTML += `
-                <div style="margin-top: 8px;">
-                    <button onclick="hit(${index})">Hit</button>
-                    <button onclick="stand()">Stand</button>
-                </div>
-            `;
-        } else if (total > 21) {
+		handHTML += `
+			<div style="margin-top: 8px;">
+			<button onclick="hit(${index})">Hit</button>
+			<button onclick="stand()">Stand</button>
+			${splitHand && !allowDAS ? '' : `<button onclick="doubleDown(${index})">Double</button>`}
+	        	</div>
+	    	`;
+	} else if (total > 21) {
             // If the hand is busted, disable further action for this hand
             handHTML += `<div style="margin-top: 8px; color: red;">Busted!</div>`;
         }
@@ -125,6 +163,24 @@ function displayHands() {
 
     // Initially show only the total for the dealer's visible card
     dealerTotalContainer.textContent = `Total: ${calculateTotal([dealerHand[1]])}`;
+}
+
+function split() {
+    const hand = playerHands[currentHandIndex];
+    if (hand.length !== 2 || hand[0].value !== hand[1].value) return;
+
+    const card1 = hand[0];
+    const card2 = hand[1];
+
+    const newHand1 = [card1, drawCard()];
+    const newHand2 = [card2, drawCard()];
+
+    // Replace current hand with the two split hands
+    playerHands.splice(currentHandIndex, 1, newHand1, newHand2);
+    splitHand = true;
+
+    document.getElementById('split-btn-container').style.display = 'none';
+    displayHands();
 }
 
 
