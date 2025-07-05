@@ -20,7 +20,13 @@
             <option value="7">7 Decks</option>
             <option value="8">8 Decks</option>
         </select>
-        <button onclick="startGame()">Start Game</button>
+
+	<!-- DAS Setting -->
+	<label for="das-setting">
+    		<input type="checkbox" id="das-setting" checked>
+    		Allow Double After Split (DAS)
+	</label>
+        
 
         <!-- Dropdown to select the number of hands (1 to 4) -->
         <label for="num-hands">Select number of hands:</label>
@@ -30,6 +36,8 @@
             <option value="3">3 Hands</option>
             <option value="4">4 Hands</option>
         </select>
+	<br />
+	<button onclick="startGame()">Start Game</button>
 
     </div>
 
@@ -60,10 +68,6 @@
             <p id="shoe-counter">Cards in Shoe: 0</p>
             <p id="discard-pile-counter">Cards in Discard Pile: 0</p>
         </div>
-        <div id="dealer-cards"></div>
-        <div id="dealer-total"></div>
-        <div id="player-cards"></div>
-        <div id="result-message"></div>
 
         <script src="game.js"></script>
 </body>
