@@ -1,33 +1,187 @@
+/* Global styling */
 body {
     font-family: Arial, sans-serif;
+    background-color: #064420;
+    color: #fff;
+    margin: 0;
+    padding: 20px;
+}
+
+/* Container layout */
+#settings-page, #game-page {
+    max-width: 960px;
+    margin: auto;
+    background-color: #0b5d36;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.4);
+}
+
+h1, h2 {
     text-align: center;
 }
 
-#settings-page {
-    margin-top: 20px;
-}
-
-#game-page {
+/* Form controls */
+label, select, button {
+    font-size: 1rem;
+    margin: 10px 0;
     display: block;
 }
 
 button {
-    padding: 10px 20px;
+    padding: 8px 16px;
+    background-color: #f2a900;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    color: #000;
+    font-weight: bold;
+}
+
+button:hover {
+    background-color: #ffca2b;
+}
+
+/* Dealer and Player hand zones */
+#dealer-hand, #player-hand {
+    border: 2px solid #ffffff22;
+    padding: 16px;
+    margin: 20px auto;
+    border-radius: 10px;
+    background-color: #0e4a2f;
+    max-width: 90%;
+}
+
+#dealer-hand {
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+}
+
+#player-hand {
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+}
+
+/* Card layout */
+#player-cards, #dealer-cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+    justify-content: center;
+}
+
+/* Individual player hand container */
+.player-hand-container {
+    background-color: #146b45;
+    border-radius: 10px;
+    padding: 10px;
     margin: 10px;
-    font-size: 16px;
+    border: 2px solid transparent;
+    transition: border 0.3s ease, box-shadow 0.3s ease;
 }
 
-h1, h2 {
-    font-size: 24px;
-    color: #333;
+/* Highlight for current hand */
+.player-hand-container.active {
+    border: 2px solid #f2a900;
+    box-shadow: 0 0 12px #f2a900;
 }
 
-#player-hand, #dealer-hand {
+/* Card styling */
+img {
+    height: 100px;
+    border-radius: 4px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+}
+
+/* Rotated card for double */
+img[style*="rotate"] {
+    transform-origin: center center;
+}
+
+/* Flip animation */
+.card {
+    width: 70px;
+    height: 100px;
+    perspective: 600px;
+    margin-right: 6px;
+    position: relative;
+}
+
+.card-inner {
+    width: 100%;
+    height: 100%;
+    transition: transform 0.6s;
+    transform-style: preserve-3d;
+    position: relative;
+}
+
+.card.flipped .card-inner {
+    transform: rotateY(180deg);
+}
+
+.card-front,
+.card-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    border-radius: 4px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+}
+
+.card-front {
+    transform: rotateY(180deg);
+}
+
+.card-back {
+    background: url('cards/card_back.png') center/cover no-repeat;
+}
+
+/* Result message styling */
+#result-message {
+    background-color: #1e7047;
+    padding: 12px;
+    border-radius: 6px;
+    margin-top: 16px;
+    font-weight: bold;
+    text-align: center;
+}
+
+/* Counters for shoe and discard */
+#game-info {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 1.1rem;
+}
+
+/* Split button positioning */
+#split-btn-container {
+    text-align: center;
     margin-top: 20px;
 }
 
-#player-cards, #dealer-cards {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
+button:disabled {
+    background-color: #999 !important;
+    color: #666;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.player-hand-container button {
+    margin-right: 8px;
+    margin-top: 4px;
+}
+
+@keyframes deal {
+    0% {
+        transform: translateY(-50px);
+        opacity: 0;
+    }
+    100% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.card-image {
+    animation: deal 0.3s ease-out;
 }
